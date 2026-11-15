@@ -1,0 +1,58 @@
+﻿
+> api@0.0.1 test:e2e
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json
+
+node : (node:27176) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+At line:2 char:11
++ $output = node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli. ...
++           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:27176) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22824) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5056) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:20272) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[31m[Nest] 27176  - [39m14/11/2026, 9:15:33 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"5af65004-ea
+5b-4162-997f-c78ee5020139","method":"POST","route":"/links","status_code":400,"error_code":"BAD_REQUEST","message":"lon
+g_url must be an absolute HTTP or HTTPS URL without control characters, backslashes, or credentials."}[39m
+PASS test/app.e2e-spec.ts
+[31m[Nest] 27176  - [39m14/11/2026, 9:15:33 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"544b6f89-5d
+50-4999-8ecb-579612e98299","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"Inv
+alid or expired token."}[39m
+(node:11668) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[31m[Nest] 27176  - [39m14/11/2026, 9:15:33 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"7024464e-30
+d0-448b-a697-0fbda2cddcf1","method":"GET","route":"/nonexistent-route","status_code":404,"error_code":"NOT_FOUND","mess
+age":"Cannot GET /nonexistent-route"}[39m
+[31m[Nest] 27176  - [39m14/11/2026, 9:15:33 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"db5e7374-50
+60-4f04-b186-b67da27c49ae","method":"GET","route":"/nonexistent-route","status_code":404,"error_code":"NOT_FOUND","mess
+age":"Cannot GET /nonexistent-route"}[39m
+[31m[Nest] 27176  - [39m14/11/2026, 9:15:33 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"7a6dd110-ad
+24-4844-95c2-173ddfef7e44","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"Inv
+alid or expired token."}[39m
+[31m[Nest] 27176  - [39m14/11/2026, 9:15:33 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"214450d2-d4
+04-4b25-883a-f3f65a044c3e","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"Inv
+alid or expired token."}[39m
+[31m[Nest] 27176  - [39m14/11/2026, 9:15:33 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"7c7bf088-e8
+1b-4924-8362-eadf5a0d15e7","method":"POST","route":"/links","status_code":500,"error_code":"INTERNAL_SERVER_ERROR","mes
+sage":"Database connection unexpectedly closed during write"}[39m
+[31m[Nest] 27176  - [39m14/11/2026, 9:15:33 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"734f26ea-fe
+fb-44e3-8c55-86409b60758b","method":"POST","route":"/links","status_code":503,"error_code":"SERVICE_UNAVAILABLE","messa
+ge":"Unable to allocate a short code right now."}[39m
+PASS test/module-05.e2e-spec.ts
+PASS test/module-04.e2e-spec.ts
+PASS test/module-03.e2e-spec.ts (5.026 s)
+[31m[Nest] 20272  - [39m14/11/2026, 9:15:35 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"de9f4f75-55
+b9-4271-bb01-5ba3948d93ef","method":"GET","route":"/r/620SM6Tc","status_code":404,"error_code":"NOT_FOUND","message":"S
+hort link not found."}[39m
+PASS test/module-06.e2e-spec.ts (6.314 s)
+
+Test Suites: 5 passed, 5 total
+Tests:       42 passed, 42 total
+Snapshots:   0 total
+Time:        7.206 s, estimated 14 s
+Ran all test suites.

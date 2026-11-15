@@ -1,0 +1,61 @@
+================================================================================
+MODULE 06 FIX: REGRESSION VERIFICATION REPORT � CACHE INVALIDATION & FALLBACK
+================================================================================
+Date: 2026-11-14
+Module: 06 � Caching With Redis
+Step: FIX
+Scenario: Cache Invalidation on Update/Delete & Database Fallback
+
+1. STARTING APPLICATION SERVER
+--------------------------------------------------------------------------------
+Server is ready on port 3000.
+
+2. AUTHENTICATION & SETUP
+--------------------------------------------------------------------------------
+POST /auth/login status: 201 (JWT token received)
+
+3. LINK CREATION
+--------------------------------------------------------------------------------
+Created Link ID : 22cc9714-cbdb-46ce-b2f8-4e7223b118dd
+Short Code      : G_1UPkPh
+Initial Long URL: https://regression-initial.example.org/
+
+4. FIRST REDIRECT (CACHE MISS -> DB HIT + POPULATE CACHE)
+--------------------------------------------------------------------------------
+GET /r/G_1UPkPh Status: 302
+Location Header: https://regression-initial.example.org/
+Result: PASS � Redirect resolved from DB and populated into cache.
+
+5. SECOND REDIRECT (CACHE HIT)
+--------------------------------------------------------------------------------
+GET /r/G_1UPkPh Status: 302
+Location Header: https://regression-initial.example.org/
+Result: PASS � Redirect resolved from Redis cache directly.
+
+6. REGRESSION CHECK: CACHE INVALIDATION ON LINK UPDATE (PATCH)
+--------------------------------------------------------------------------------
+PATCH /links/22cc9714-cbdb-46ce-b2f8-4e7223b118dd Status: 200
+Updated Long URL in Database: https://regression-updated.example.org/
+
+7. POST-UPDATE REDIRECT (VERIFY NO STALE DATA)
+--------------------------------------------------------------------------------
+GET /r/G_1UPkPh Status: 302
+Location Header: https://regression-updated.example.org/
+Result: PASS � Cache was invalidated; redirect served new destination.
+
+8. REGRESSION CHECK: CACHE INVALIDATION ON LINK DELETION
+--------------------------------------------------------------------------------
+DELETE /links/22cc9714-cbdb-46ce-b2f8-4e7223b118dd Status: 200
+GET /r/G_1UPkPh After Delete Status: 404
+Result: PASS � Cache invalidated; deleted link returns 404, not stale redirect.
+
+9. REGRESSION CHECK: REDIS-DOWN DATABASE FALLBACK DRILL
+--------------------------------------------------------------------------------
+Created Fallback Test Code: aMk68BKy
+GET /r/aMk68BKy with Redis Down Status: 302
+Location Header: https://fallback-verified.example.org/
+Result: PASS � Graceful database fallback confirmed when Redis is unavailable.
+
+================================================================================
+SUMMARY: ALL MODULE 06 FIX REGRESSION CHECKS PASSED
+================================================================================

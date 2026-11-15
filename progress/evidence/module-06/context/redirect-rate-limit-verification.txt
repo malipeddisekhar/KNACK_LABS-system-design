@@ -1,0 +1,172 @@
+================================================================================
+MODULE 06 CONTEXT EVIDENCE: REDIRECT RATE-LIMIT VERIFICATION (120/MIN)
+================================================================================
+Date: 2026-11-13T08:45:39.043Z
+Skill: System Design Fundamentals
+Pack: Practitioner
+Module: 06 - Caching With Redis
+Step: CONTEXT
+Scenario: Public Consumer Service (Abuse First)
+
+1. VERIFICATION OBJECTIVE
+--------------------------------------------------------------------------------
+Verify that the Module 4 redirect rate limit (120 requests/minute) is strictly
+enforced on public redirect endpoints using a single valid short code and same client:
+  - Requests 1-120: must return HTTP 302 Found.
+  - Request 121: must return HTTP 429 Too Many Requests.
+  - All 121 requests must execute within a 60-second window.
+
+2. TEST CONFIGURATION
+--------------------------------------------------------------------------------
+Test Command:        node scratch/verify-redirect-rate-limit.mjs
+Target Base URL:     http://localhost:3000
+Short Code Tested:   tEaEHlEv
+Target Long URL:     https://example.com/module-06-rate-limit-1794559538598
+Total Requests Sent: 121
+Time Window Limit:   60.000 seconds
+Actual Elapsed Time: 315 ms (0.315 seconds)
+
+3. RESULTS BREAKDOWN
+--------------------------------------------------------------------------------
+HTTP 302 Found:            120 (Expected: 120)
+HTTP 429 Too Many Requests: 1 (Expected: 1)
+Other HTTP Statuses:        0 (Expected: 0)
+
+Key Boundary Transitions:
+  - Request 1:   HTTP 302 (Location: https://example.com/module-06-rate-limit-1794559538598)
+  - Request 60:  HTTP 302
+  - Request 119: HTTP 302
+  - Request 120: HTTP 302 [FINAL ALLOWED IN WINDOW]
+  - Request 121: HTTP 429 [FIRST BLOCKED BY RATE LIMITER]
+
+All Request Details (1 to 121):
+--------------------------------------------------------------------------------
+Request   1: HTTP 302 | X-Request-ID: 41c48901-4e0f-410b-a09e-92765d2585cc
+Request   2: HTTP 302 | X-Request-ID: 44b13f69-a896-478a-836c-42f0706ce623
+Request   3: HTTP 302 | X-Request-ID: 64f2216b-9a1d-4d5a-9a82-4edea1fb986e
+Request   4: HTTP 302 | X-Request-ID: f04fd932-7488-4557-bd83-367a3bdfc972
+Request   5: HTTP 302 | X-Request-ID: 66b26bcd-b1a5-44d1-99ff-841923300389
+Request   6: HTTP 302 | X-Request-ID: ed4591e2-6836-4d85-8ccb-503e0fc598d9
+Request   7: HTTP 302 | X-Request-ID: 12870aad-824d-4b17-b77c-e8862bcb393e
+Request   8: HTTP 302 | X-Request-ID: 8e46e9a0-45ca-4c21-bd21-87f0e537baf8
+Request   9: HTTP 302 | X-Request-ID: c1612ad1-640e-4be0-860d-a4af1e6a4071
+Request  10: HTTP 302 | X-Request-ID: 255ab52d-568e-43ad-9d3d-69033b9ecc97
+Request  11: HTTP 302 | X-Request-ID: 780dc3a7-fee6-4428-aa6c-772177bac86e
+Request  12: HTTP 302 | X-Request-ID: d300ea3b-5cf8-42da-9ca9-9921bb6e34c7
+Request  13: HTTP 302 | X-Request-ID: fd992609-212c-4067-83ac-5d5524b66233
+Request  14: HTTP 302 | X-Request-ID: d2d9b7f2-3dec-47fa-989a-e174603cdcee
+Request  15: HTTP 302 | X-Request-ID: 2e3bf1fb-4440-4a6f-8936-9637db1028be
+Request  16: HTTP 302 | X-Request-ID: d0f5e56b-07b9-4367-afd7-a01331dac35c
+Request  17: HTTP 302 | X-Request-ID: ef0f548a-d154-4145-938e-b6f959f7c84d
+Request  18: HTTP 302 | X-Request-ID: ee5edd8f-0eb7-464e-af12-c3c46b1cac57
+Request  19: HTTP 302 | X-Request-ID: 42823913-80f8-440d-8451-f7be2fa0bcd4
+Request  20: HTTP 302 | X-Request-ID: b2695abc-280d-4b54-8cc9-66d4f7a3cd45
+Request  21: HTTP 302 | X-Request-ID: e693aded-2414-40dd-a01e-1d17b793421f
+Request  22: HTTP 302 | X-Request-ID: a0415a34-11b4-40fe-8cc1-0121dd5822f2
+Request  23: HTTP 302 | X-Request-ID: 12ed8f65-3474-4242-b386-22bd68b9d1f5
+Request  24: HTTP 302 | X-Request-ID: 2cbbe6e3-bd2b-4d22-88e2-1671b5133630
+Request  25: HTTP 302 | X-Request-ID: 8cfd2d17-b825-4be2-9d0c-3fd50a99ee1b
+Request  26: HTTP 302 | X-Request-ID: 2e57ea37-5ec6-4c31-be24-4591be802baf
+Request  27: HTTP 302 | X-Request-ID: a9db5741-be50-44dd-b9d7-451d4900970b
+Request  28: HTTP 302 | X-Request-ID: df289d4b-3bce-41d9-842d-bee464253a58
+Request  29: HTTP 302 | X-Request-ID: fcf0488a-24f6-442b-ac3a-e64e60c58a16
+Request  30: HTTP 302 | X-Request-ID: 2885efad-1048-4519-b7bb-444f1291a049
+Request  31: HTTP 302 | X-Request-ID: 25509256-8078-430e-bc02-f92b28226595
+Request  32: HTTP 302 | X-Request-ID: 2f9d778d-cacd-45b8-a0eb-a85b4af9cf38
+Request  33: HTTP 302 | X-Request-ID: 6504fda7-cdf8-4cb8-a683-86bc7eacd8e4
+Request  34: HTTP 302 | X-Request-ID: a2c4bf25-a51e-440d-a664-c711cbab3beb
+Request  35: HTTP 302 | X-Request-ID: 4859fda6-fe30-4dc7-a458-b9ac1e469403
+Request  36: HTTP 302 | X-Request-ID: 68ab2a1c-ca07-486d-8e0d-75482bc36726
+Request  37: HTTP 302 | X-Request-ID: 39f91612-138a-4521-a9c1-2e8ae9d4eac3
+Request  38: HTTP 302 | X-Request-ID: 06c60599-72bb-4b94-9854-43a37c345960
+Request  39: HTTP 302 | X-Request-ID: 9f32c661-6b23-429e-8b1b-07446c12e4d0
+Request  40: HTTP 302 | X-Request-ID: 86b5bb5e-bdc4-4b4a-adae-1a89390402ed
+Request  41: HTTP 302 | X-Request-ID: 7088d2fd-1fd0-4114-9477-14cfb86267b6
+Request  42: HTTP 302 | X-Request-ID: 3037632a-80ed-41b8-90fd-8078b2e5d5fe
+Request  43: HTTP 302 | X-Request-ID: 9fc4822c-ea84-4f9f-a765-8cf14d47c1d8
+Request  44: HTTP 302 | X-Request-ID: 5f510795-4550-4289-83ee-6348e2afebec
+Request  45: HTTP 302 | X-Request-ID: a66275c1-61d0-4a4b-b10c-7f1f3956b0a6
+Request  46: HTTP 302 | X-Request-ID: c4787b02-9f4c-4bbb-952f-70ba15cd3718
+Request  47: HTTP 302 | X-Request-ID: 848bf3bc-6493-400f-a853-6a3da4404e60
+Request  48: HTTP 302 | X-Request-ID: d1d76882-38e4-4745-8c44-321754eb5e14
+Request  49: HTTP 302 | X-Request-ID: e64c2bbb-c769-44d6-9e7d-9150e86ef065
+Request  50: HTTP 302 | X-Request-ID: f772a92e-e1c1-4917-9b91-10c1ab5644ae
+Request  51: HTTP 302 | X-Request-ID: d5c32a5a-4050-4644-8687-c6135e2a86d4
+Request  52: HTTP 302 | X-Request-ID: 42dafd4f-b777-42d3-84f9-5f9b48054a24
+Request  53: HTTP 302 | X-Request-ID: 47e04739-8b1e-49ce-84e3-685527c03f4c
+Request  54: HTTP 302 | X-Request-ID: 99ad2f44-664d-4839-a734-b924afac582c
+Request  55: HTTP 302 | X-Request-ID: 4681d8c4-1cae-4028-b2e0-9ff374c26008
+Request  56: HTTP 302 | X-Request-ID: ba1e923d-fb1d-4ae5-b418-cfa42ac631f2
+Request  57: HTTP 302 | X-Request-ID: 17d14575-6309-45ce-89fa-8dd2e8167f4a
+Request  58: HTTP 302 | X-Request-ID: 6a41e725-f4c2-4f29-bd3e-e6739184ecb5
+Request  59: HTTP 302 | X-Request-ID: fa0455ec-1182-42bf-ae6c-09ffd4432c59
+Request  60: HTTP 302 | X-Request-ID: c10fa930-70aa-4bbf-bee3-2dd0c145de5c
+Request  61: HTTP 302 | X-Request-ID: 53649f67-f026-4a3d-b99b-6638cff528d9
+Request  62: HTTP 302 | X-Request-ID: f7bc6cb7-f7f9-4102-ad37-a689e7fb1cc2
+Request  63: HTTP 302 | X-Request-ID: 920b2c75-d971-402b-80d9-a62cd903be7e
+Request  64: HTTP 302 | X-Request-ID: ded621b6-9407-40b8-b4e5-1477c2d54ab8
+Request  65: HTTP 302 | X-Request-ID: 407d2002-825a-47cb-b72e-23a4b39806a9
+Request  66: HTTP 302 | X-Request-ID: 5b0b41d6-218c-4d85-908c-4ecca1d441d9
+Request  67: HTTP 302 | X-Request-ID: dd18fad7-f57f-4357-9ee1-f0ceca782e84
+Request  68: HTTP 302 | X-Request-ID: 7ddbcf1f-7a9f-4bdc-b7b4-9d7a2c94206e
+Request  69: HTTP 302 | X-Request-ID: f28510f4-ff08-4b43-a983-6102ec34338f
+Request  70: HTTP 302 | X-Request-ID: 308a0ca9-f957-4a39-ad2e-3d2c922f10b3
+Request  71: HTTP 302 | X-Request-ID: 4913a11e-75c8-4e27-a073-3b81c0570d4f
+Request  72: HTTP 302 | X-Request-ID: 2d47f09f-c98d-4b0b-971c-4ba0cc288e69
+Request  73: HTTP 302 | X-Request-ID: 65564b0a-a534-46b0-bb2d-f65d4ab40e35
+Request  74: HTTP 302 | X-Request-ID: 6b7e3454-70a6-40f8-857f-e39c82f1616e
+Request  75: HTTP 302 | X-Request-ID: d6678a3c-8154-4ad7-aa78-d817096384ab
+Request  76: HTTP 302 | X-Request-ID: 809d206f-a832-4447-a18c-2e67f50b05f5
+Request  77: HTTP 302 | X-Request-ID: fec40779-a9f4-4750-b537-be00d36d898d
+Request  78: HTTP 302 | X-Request-ID: e2009028-720c-40de-8411-cdbe5a1268e6
+Request  79: HTTP 302 | X-Request-ID: c777b3f1-2f45-4fbc-a808-f69bb2faeaaf
+Request  80: HTTP 302 | X-Request-ID: ceaa4c3c-79b1-4bfa-89e4-48d5775b73a1
+Request  81: HTTP 302 | X-Request-ID: a6df0d66-52a9-4bc4-b8b7-03794aa1e057
+Request  82: HTTP 302 | X-Request-ID: de495dc3-46f3-4160-ba39-fc6f6c52f9eb
+Request  83: HTTP 302 | X-Request-ID: d435f452-2f6d-4993-9779-d9ea587af036
+Request  84: HTTP 302 | X-Request-ID: f53711ca-d6ab-4c70-8fe8-2c25ada51503
+Request  85: HTTP 302 | X-Request-ID: 52f96188-c0f8-44a2-af12-de86f05f038a
+Request  86: HTTP 302 | X-Request-ID: 9f8d59b2-e8ea-44e4-971d-d0ad270d9cba
+Request  87: HTTP 302 | X-Request-ID: eb276c39-2857-4a8f-97eb-c6e7def0f10d
+Request  88: HTTP 302 | X-Request-ID: e5ef59d6-0e46-4f3c-b4c3-e77fe0fdbc9c
+Request  89: HTTP 302 | X-Request-ID: df8c4d45-8212-4d49-a4e9-e44e041651fc
+Request  90: HTTP 302 | X-Request-ID: d4bea5b1-70d4-4ee7-aa56-c54867c0aa44
+Request  91: HTTP 302 | X-Request-ID: 81b213c2-1e64-4fe5-969c-551bac78c656
+Request  92: HTTP 302 | X-Request-ID: 750457fa-be48-4d1c-9467-e77d708ee23b
+Request  93: HTTP 302 | X-Request-ID: aac04984-e5a4-4200-b7cf-c1c556b86111
+Request  94: HTTP 302 | X-Request-ID: 7cf7259c-495e-4d96-a04d-9ab8c5beb04a
+Request  95: HTTP 302 | X-Request-ID: 386a296b-a241-46de-90bc-3fd2cc1225c7
+Request  96: HTTP 302 | X-Request-ID: 0ff2aa71-e070-4f02-bf5f-64047d5c33f5
+Request  97: HTTP 302 | X-Request-ID: 4a8337d5-9128-4b93-b149-20823c4a7d76
+Request  98: HTTP 302 | X-Request-ID: bfe6e824-c138-49ac-be20-2093dfceab10
+Request  99: HTTP 302 | X-Request-ID: cf1fd9c9-9e97-4546-b080-71d5bdb4c605
+Request 100: HTTP 302 | X-Request-ID: 90210a3c-916b-480f-b031-5845d90d0921
+Request 101: HTTP 302 | X-Request-ID: fd1a9623-2856-4c8e-83f9-67c8d4e13357
+Request 102: HTTP 302 | X-Request-ID: 87f8110b-f2ab-45a1-857e-856651e8b08c
+Request 103: HTTP 302 | X-Request-ID: 53feb9c7-9e1e-4bc2-aaf0-a9d7cc7385dd
+Request 104: HTTP 302 | X-Request-ID: d0f81c62-3674-4620-b437-81a9f929b877
+Request 105: HTTP 302 | X-Request-ID: eef459c0-91db-4f2b-b701-899fa0b37ca6
+Request 106: HTTP 302 | X-Request-ID: 5198fee9-971c-47f0-9b0c-91970f061640
+Request 107: HTTP 302 | X-Request-ID: 4fbb8612-e883-4771-bbf3-1a9fc0711feb
+Request 108: HTTP 302 | X-Request-ID: 06a002c7-d1f6-4b94-9e2d-5bac40b6abe6
+Request 109: HTTP 302 | X-Request-ID: 85ee3c5a-586a-490a-8744-82484ece41fc
+Request 110: HTTP 302 | X-Request-ID: 7ed68fb3-f3c5-40c1-b305-40359b562089
+Request 111: HTTP 302 | X-Request-ID: 60ce2b7f-d6a1-4e70-b710-4334248f3f5a
+Request 112: HTTP 302 | X-Request-ID: aac203d0-a55f-4e61-8cf5-d4b9d5d08837
+Request 113: HTTP 302 | X-Request-ID: b4fc3b92-c832-4194-af9f-286862e24420
+Request 114: HTTP 302 | X-Request-ID: 9ec88027-ab1d-4c1a-947f-329bc05c7540
+Request 115: HTTP 302 | X-Request-ID: de45e64a-e6b8-47a3-ad18-8d1e08a7be51
+Request 116: HTTP 302 | X-Request-ID: eec1dca8-27f8-4cff-92eb-bf492c338252
+Request 117: HTTP 302 | X-Request-ID: ff0730e1-e765-4ecb-93fa-708442644974
+Request 118: HTTP 302 | X-Request-ID: c2019789-9ec2-4660-9909-d7939084e9ee
+Request 119: HTTP 302 | X-Request-ID: bcbeed8e-546a-4fa5-9e5e-c253084e85fa
+Request 120: HTTP 302 | X-Request-ID: 8a1dc5b3-0320-4b44-92ca-1ff811f51087
+Request 121: HTTP 429 | X-Request-ID: b722a9b3-a59c-4a8f-ae0e-7e9032079ff9
+
+4. RATE LIMIT COMPLIANCE VERIFICATION
+--------------------------------------------------------------------------------
+Requests 1-120 returned HTTP 302:               CONFIRMED (PASS)
+Request 121 returned HTTP 429:                  CONFIRMED (PASS)
+Completed within 60-second window:             CONFIRMED (0.315s < 60s) (PASS)
+Overall Verification Outcome:                  PASS
+================================================================================

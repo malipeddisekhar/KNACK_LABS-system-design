@@ -1,0 +1,247 @@
+
+> api@0.0.1 test:e2e
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json --runInBand test/module-08.e2e-spec.ts
+
+(node:6240) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[Nest] 6240  - 14/11/2026, 2:53:11 pm   ERROR [ExceptionsHandler] PrismaClientKnownRequestError: 
+Invalid `this.prisma.link.create()` invocation in
+D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\links\links.service.ts:83:45
+
+  80 const code = randomBytes(6).toString('base64url');
+  81 
+  82 try {
+→ 83   const link = await this.prisma.link.create(
+
+    at vn.handleRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:238:13)
+    at vn.handleAndLogRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:184:12)
+    at vn.request (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:153:12)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at a (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1012:24)
+    at LinksService.create (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\links\links.service.ts:83:22)
+    at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-execution-context.js:90:62
+    at LinksController.create (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-proxy.js:6:17) {
+  code: 'ECONNREFUSED',
+  meta: {
+    modelName: 'Link'
+  },
+  clientVersion: '7.10.1'
+}
+[Nest] 6240  - 14/11/2026, 2:53:11 pm   ERROR [ExceptionsHandler] PrismaClientKnownRequestError: 
+Invalid `this.prisma.link.create()` invocation in
+D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\links\links.service.ts:83:45
+
+  80 const code = randomBytes(6).toString('base64url');
+  81 
+  82 try {
+→ 83   const link = await this.prisma.link.create(
+
+    at vn.handleRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:238:13)
+    at vn.handleAndLogRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:184:12)
+    at vn.request (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:153:12)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at a (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1012:24)
+    at LinksService.create (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\links\links.service.ts:83:22)
+    at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-execution-context.js:90:62
+    at LinksController.create (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-proxy.js:6:17) {
+  code: 'ECONNREFUSED',
+  meta: {
+    modelName: 'Link'
+  },
+  clientVersion: '7.10.1'
+}
+[Nest] 6240  - 14/11/2026, 2:53:11 pm   ERROR [ExceptionsHandler] PrismaClientKnownRequestError: 
+Invalid `this.prisma.link.create()` invocation in
+D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\links\links.service.ts:83:45
+
+  80 const code = randomBytes(6).toString('base64url');
+  81 
+  82 try {
+→ 83   const link = await this.prisma.link.create(
+
+    at vn.handleRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:238:13)
+    at vn.handleAndLogRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:184:12)
+    at vn.request (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:153:12)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at a (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1012:24)
+    at LinksService.create (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\links\links.service.ts:83:22)
+    at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-execution-context.js:90:62
+    at LinksController.create (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-proxy.js:6:17) {
+  code: 'ECONNREFUSED',
+  meta: {
+    modelName: 'Link'
+  },
+  clientVersion: '7.10.1'
+}
+[Nest] 6240  - 14/11/2026, 2:53:11 pm   ERROR [ExceptionsHandler] PrismaClientKnownRequestError: 
+Invalid `this.prisma.link.create()` invocation in
+D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\links\links.service.ts:83:45
+
+  80 const code = randomBytes(6).toString('base64url');
+  81 
+  82 try {
+→ 83   const link = await this.prisma.link.create(
+
+    at vn.handleRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:238:13)
+    at vn.handleAndLogRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:184:12)
+    at vn.request (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:153:12)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at a (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1012:24)
+    at LinksService.create (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\links\links.service.ts:83:22)
+    at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-execution-context.js:90:62
+    at LinksController.create (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-proxy.js:6:17) {
+  code: 'ECONNREFUSED',
+  meta: {
+    modelName: 'Link'
+  },
+  clientVersion: '7.10.1'
+}
+[Nest] 6240  - 14/11/2026, 2:53:11 pm   ERROR [ExceptionsHandler] PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRaw()` invocation:
+
+
+
+    at vn.handleRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:238:13)
+    at vn.handleAndLogRequestError (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:184:12)
+    at vn.request (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\RequestHandler.ts:153:12)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at a (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:1012:24)
+    at LinksService.search (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\links\links.service.ts:191:25)
+    at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-execution-context.js:90:62
+    at LinksController.search (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\router\router-proxy.js:6:17) {
+  code: 'ECONNREFUSED',
+  meta: undefined,
+  clientVersion: '7.10.1'
+}
+  console.warn
+    IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+  console.warn
+    IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+  console.warn
+    IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+FAIL test/module-08.e2e-spec.ts (7.437 s)
+  ● Module 8 Full-Text Search & Pagination (e2e) › searches links by full-text query using to_tsvector and plainto_tsquery
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+      61 |         tags: ['documentation', 'microservice'],
+      62 |       })
+    > 63 |       .expect(201);
+         |        ^
+      64 |     createdIds.push(link1.body.id as string);
+      65 |
+      66 |     const link2 = await request(app.getHttpServer())
+
+      at Object.<anonymous> (module-08.e2e-spec.ts:63:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:535:14)
+      at ../node_modules/supertest/lib/test.js:591:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:568:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:432:23)
+      at localAssert (../node_modules/supertest/lib/test.js:382:38)
+      at Server.<anonymous> (../node_modules/supertest/lib/test.js:126:7)
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › filters search results by tag and supports combined query+tag filtering
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+      120 |         tags: [uniqueTag, 'backend'],
+      121 |       })
+    > 122 |       .expect(201);
+          |        ^
+      123 |     createdIds.push(linkA.body.id as string);
+      124 |
+      125 |     const linkB = await request(app.getHttpServer())
+
+      at Object.<anonymous> (module-08.e2e-spec.ts:122:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:535:14)
+      at ../node_modules/supertest/lib/test.js:591:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:568:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:432:23)
+      at localAssert (../node_modules/supertest/lib/test.js:382:38)
+      at Server.<anonymous> (../node_modules/supertest/lib/test.js:126:7)
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › handles pagination correctly with page and page_size metadata
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+      164 |           tags: [pageTag],
+      165 |         })
+    > 166 |         .expect(201);
+          |          ^
+      167 |       createdIds.push(created.body.id as string);
+      168 |     }
+      169 |
+
+      at Object.<anonymous> (module-08.e2e-spec.ts:166:10)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:535:14)
+      at ../node_modules/supertest/lib/test.js:591:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:568:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:432:23)
+      at localAssert (../node_modules/supertest/lib/test.js:382:38)
+      at Server.<anonymous> (../node_modules/supertest/lib/test.js:126:7)
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › enforces owner-scoped search isolation across distinct principals
+
+    expected 201 "Created", got 500 "Internal Server Error"
+
+      244 |         long_url: `https://${isolationKeyword}.alice-domain.example.com`,
+      245 |       })
+    > 246 |       .expect(201);
+          |        ^
+      247 |     createdIds.push(aliceLink.body.id as string);
+      248 |
+      249 |     // Alice searches for her host -> finds 1
+
+      at Object.<anonymous> (module-08.e2e-spec.ts:246:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:535:14)
+      at ../node_modules/supertest/lib/test.js:591:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:568:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:432:23)
+      at localAssert (../node_modules/supertest/lib/test.js:382:38)
+      at Server.<anonymous> (../node_modules/supertest/lib/test.js:126:7)
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › validates dynamic sorting and rejects unauthorized sort fields
+
+    expected 200 "OK", got 500 "Internal Server Error"
+
+      271 |       .get('/links/search?sort_by=created_at&sort_order=desc')
+      272 |       .set('Authorization', `Bearer ${token}`)
+    > 273 |       .expect(200);
+          |        ^
+      274 |     expect(validSort.body).toHaveProperty('items');
+      275 |
+      276 |     // Unauthorized sort field rejected with HTTP 400
+
+      at Object.<anonymous> (module-08.e2e-spec.ts:273:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:535:14)
+      at ../node_modules/supertest/lib/test.js:591:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:568:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:432:23)
+      at localAssert (../node_modules/supertest/lib/test.js:382:38)
+      at Server.<anonymous> (../node_modules/supertest/lib/test.js:126:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       5 failed, 2 passed, 7 total
+Snapshots:   0 total
+Time:        7.767 s
+Ran all test suites matching test/module-08.e2e-spec.ts.
+
+BREAK reproduction timestamp: 2026-11-14T14:53:04.3094132+05:30
+Exit code: 1

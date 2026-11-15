@@ -1,0 +1,30 @@
+=== Module 10 Unit Tests: WorkerModule and AppModule Separation ===
+PASS src/worker.module.spec.ts
+  WorkerModule and AppModule Separation (unit)
+    √ registers AnalyticsProcessor in WorkerModule providers (3 ms)
+    √ exports AnalyticsProcessor from WorkerModule
+    √ does NOT register AnalyticsProcessor in AnalyticsModule providers (1 ms)
+    √ does NOT register AnalyticsProcessor in AppModule providers
+    √ does NOT declare HTTP controllers in WorkerModule (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        2.026 s
+
+=== Module 10 E2E Tests: Multi-Service Separation ===
+PASS test/module-10.e2e-spec.ts
+  Module 10 Multi-Service Separation (e2e)
+    1. API responsibility (AppModule)
+      √ provides the analytics queue producer (AnalyticsService and Queue) (2 ms)
+      √ does NOT register or start AnalyticsProcessor in the API module (22 ms)
+      √ continues to serve API routes and authenticated link creation (82 ms)
+    2. Worker responsibility (WorkerModule)
+      √ registers and resolves AnalyticsProcessor in WorkerModule (6 ms)
+      √ bootstraps without API-only environment variables (PORT, JWT_SECRET) (5 ms)
+      √ processes click events and persists to database with idempotency (112 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        3.052 s

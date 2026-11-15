@@ -1,0 +1,5 @@
+SCENARIO 7 corrected: excessive link creation beyond 30/minute
+Expected: HTTP 429 on request 31
+Actual: HTTP 429
+Security weakness: None observed.
+Cleanup: deleted 30 test link records.

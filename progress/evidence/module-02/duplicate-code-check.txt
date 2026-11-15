@@ -1,0 +1,3 @@
+Duplicate insert rejected: true
+Unique-constraint violation: true (P2002)
+Deleted test records: 1

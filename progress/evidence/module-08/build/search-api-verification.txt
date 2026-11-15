@@ -1,0 +1,98 @@
+================================================================================
+UPSK SYSTEM DESIGN MODULE 8 - BUILD: SEARCH API IMPLEMENTATION VERIFICATION
+================================================================================
+Timestamp: 2026-11-14T07:18:00Z
+Workspace: D:\KNACK SEKHAR LAB\upsk-system-design-workspace
+API Directory: D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api
+
+1. REQUIREMENTS VERIFICATION CHECKLIST
+--------------------------------------------------------------------------------
+[x] Endpoint: Authenticated GET /links/search with JwtAuthGuard
+[x] Query Parameters:
+    - q: Optional string query for PostgreSQL Full-Text Search
+    - tag: Optional string filter against links.tags array
+    - page: 1-indexed pagination number (default 1)
+    - page_size: Page size bounded between 1 and 100 (default 20)
+    - sort_by: Optional allowlisted sort column ('created_at', 'long_url', 'code')
+    - sort_order: Optional sort direction ('asc', 'desc')
+[x] PostgreSQL Full-Text Search:
+    - Utilizes PostgreSQL GIN index `links_long_url_search_gin_idx`
+    - Expression: to_tsvector('simple', "long_url") @@ plainto_tsquery('simple', $q)
+[x] Tag Filtering:
+    - Parameterized array inclusion: $tag = ANY("tags")
+[x] User Ownership Isolation:
+    - Strictly scoped to authenticated user: "principal_id" = $principalId
+[x] Pagination Metadata:
+    - Returns structured object: { items, page, page_size, total }
+[x] Bounds Enforcement:
+    - page_size > 100 rejected with HTTP 400 Bad Request
+    - page_size < 1 rejected with HTTP 400 Bad Request
+    - Non-numeric page/page_size rejected with HTTP 400 Bad Request
+[x] Dynamic Sorting Protection:
+    - Strictly allowlisted in DTO and SQL mapping; unknown fields rejected with HTTP 400
+[x] SQL Injection Protection:
+    - Fully parameterized via Prisma.sql tagged templates and $queryRaw
+[x] Preserved Existing Behavior:
+    - GET /links, GET /links/:id, POST /links, PATCH /links/:id, DELETE /links/:id,
+      GET /r/:code, and GET /links/:id/analytics remain unchanged and fully functional.
+
+2. CHANGED & IMPLEMENTED FILES
+--------------------------------------------------------------------------------
+1. api/src/links/dto/search-links-query.dto.ts:
+   - DTO class with class-validator annotations (@IsOptional, @IsString, @IsInt, @Min(1), @Max(100), @IsIn)
+   - Strongly types q, tag, page, page_size, sort_by, sort_order.
+
+2. api/src/links/links.service.ts:
+   - Added SearchLinksResponse interface ({ items, page, page_size, total }).
+   - Implemented search(query: SearchLinksQueryDto, principalId: string):
+     - Calculates pagination offsets (offset = (page - 1) * pageSize)
+     - Builds parameterized whereClause with principalId, FTS plainto_tsquery, and tag filter
+     - Executes count query via $queryRaw<[{ count: number }]>
+     - Executes paginated fetch with allowlisted sort order and mapped items
+
+3. api/src/links/links.controller.ts:
+   - Added @Get('search') route with @UseGuards(JwtAuthGuard)
+   - Positioned before @Get(':id') to prevent ParseUUIDPipe route collisions.
+
+4. api/test/module-08.e2e-spec.ts:
+   - End-to-end test suite covering:
+     1. Rejection of unauthenticated and invalid token requests (HTTP 401)
+     2. FTS matching on long_url using to_tsvector and plainto_tsquery
+     3. Tag filtering and combined query + tag filtering
+     4. Pagination metadata and disjoint page results
+     5. Page size boundary validation (min 1, max 100, invalid rejection)
+     6. Owner-scoped isolation between distinct principals (Alice vs. Bob)
+     7. Dynamic sorting allowlist and unauthorized sort rejection (HTTP 400)
+
+3. ACTUAL TEST VERIFICATION RESULTS
+--------------------------------------------------------------------------------
+LINT:
+- oxlint --type-aware src/ test/
+- Result: Found 0 warnings and 0 errors across 60 files.
+
+BUILD:
+- nest build
+- Result: Compiled successfully without errors.
+
+UNIT TESTS:
+- Test Suites: 3 passed, 3 total
+- Tests:       10 passed, 10 total
+- Suites:
+  * src/app.controller.spec.ts: PASS
+  * src/analytics/analytics.service.spec.ts: PASS
+  * src/app.module.spec.ts: PASS
+
+E2E TESTS:
+- Test Suites: 7 passed, 7 total
+- Tests:       55 passed, 55 total
+- Suites:
+  * test/app.e2e-spec.ts: PASS (5 tests)
+  * test/module-03.e2e-spec.ts: PASS (7 tests)
+  * test/module-05.e2e-spec.ts: PASS (9 tests)
+  * test/module-06.e2e-spec.ts: PASS (11 tests)
+  * test/module-07.e2e-spec.ts: PASS (16 tests)
+  * test/module-08.e2e-spec.ts: PASS (7 tests)
+
+================================================================================
+STATUS: Module 8 BUILD Search API implementation complete and verified.
+================================================================================

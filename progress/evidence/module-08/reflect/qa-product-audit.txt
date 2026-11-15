@@ -1,0 +1,130 @@
+================================================================================
+UPSK SYSTEM DESIGN MODULE 8 - REFLECT: ROLE-SWAP QA & PRODUCT AUDIT
+================================================================================
+Auditors: Senior QA Engineer & Lead Product Reviewer
+Module: Module 08 — Search & Advanced Queries
+Target: Authenticated GET /links/search Endpoint
+Workspace: D:\KNACK SEKHAR LAB\upsk-system-design-workspace
+Timestamp: 2026-11-14T14:45:00Z
+
+--------------------------------------------------------------------------------
+EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+The GET /links/search endpoint implements database-native full-text search (FTS)
+using PostgreSQL GIN indexing, parameterized SQL query construction, and strict
+pagination controls. All 8 audited dimensions evaluated to PASS. The endpoint
+exhibits robust multi-tenant data isolation, strict input validation boundaries,
+and complete protection against dynamic SQL injection attempts.
+
+--------------------------------------------------------------------------------
+DETAILED AUDIT FINDINGS (8 CHECKPOINTS)
+--------------------------------------------------------------------------------
+
+1. AUTHENTICATION & ACCESS CONTROL
+- Status: PASS
+- Requirement: Unauthenticated and invalid token requests must be rejected with HTTP 401.
+- Implementation:
+  * Route decorated with `@UseGuards(JwtAuthGuard)` in `links.controller.ts`.
+  * Extracts authenticated `principalId` via `@CurrentPrincipal()` decorator.
+- Evidence:
+  * Test: `rejects unauthenticated and invalid token search requests with HTTP 401` in `module-08.e2e-spec.ts`.
+  * Live Request without header: `curl http://localhost:3000/links/search` -> HTTP 401 Unauthorized.
+  * Live Request with bad Bearer: `curl -H "Authorization: Bearer invalid"` -> HTTP 401 Unauthorized.
+
+2. MULTI-TENANT OWNERSHIP ISOLATION
+- Status: PASS
+- Requirement: Users cannot search, discover, or access links owned by other principals.
+- Implementation:
+  * Invariant condition in `links.service.ts`: `Prisma.sql`"principal_id" = ${principalId}``.
+  * Injected unconditionally into both the `COUNT(*)` query and the row retrieval query.
+- Evidence:
+  * Test: `enforces owner-scoped search isolation across distinct principals` in `module-08.e2e-spec.ts`.
+  * Live Verification: Alice seeds link `https://reflect-docs-...`; Bob searches for the exact same host keyword.
+    Result: Bob receives `total: 0, items: []`. Alice's records remain 100% invisible to Bob.
+
+3. FULL-TEXT SEARCH & TAG FILTERING
+- Status: PASS
+- Requirement: Keyword search across URLs and tag filtering must return matching records accurately.
+- Implementation:
+  * FTS query expression: `to_tsvector('simple', "long_url") @@ plainto_tsquery('simple', ${query.q.trim()})`.
+  * Tag filtering: `${query.tag.trim()} = ANY("tags")`.
+  * Combined queries concatenated cleanly via SQL `AND`.
+- Evidence:
+  * Test: `searches links by full-text query using to_tsvector and plainto_tsquery` and `filters search results by tag and supports combined query+tag filtering`.
+  * Matches host and path tokens reliably; non-existent keywords return `total: 0, items: []`.
+
+4. PAGINATION CORRECTNESS & BOUNDARIES
+- Status: PASS
+- Requirement: Page 1, Page 2, page_size boundaries, and metadata are accurate. No off-by-one errors.
+- Implementation:
+  * Corrected 0-indexed offset formula: `const offset = (page - 1) * pageSize;`.
+  * Normalized page: `page = query.page && query.page > 0 ? query.page : 1;`.
+  * Capped pageSize: `pageSize = query.page_size && query.page_size > 0 ? Math.min(query.page_size, 100) : 20;`.
+- Evidence:
+  * Unit Test: `src/links/pagination-boundary.spec.ts` proves Page 1 produces offset 0, Page 2 produces offset pageSize.
+  * E2E Test: `handles pagination correctly with page and page_size metadata` proves:
+    - Page 1 starts with record 0.
+    - Page 2 starts with record 2 (disjoint subsets, zero overlap).
+    - Datasets smaller than page_size return all matching records on Page 1.
+    - Metadata returns `{ items, page, page_size, total }` with exact counts.
+
+5. DYNAMIC SORTING ALLOWLIST
+- Status: PASS
+- Requirement: Only allowlisted sort fields and sort directions are accepted.
+- Implementation:
+  * Validated at DTO boundary via `SearchLinksQueryDto`:
+    `@IsIn(['created_at', 'long_url', 'code'])`
+    `@IsIn(['asc', 'desc', 'ASC', 'DESC'])`
+  * Mapped in service via explicit conditional mapping (`sort_by === 'long_url' ? "long_url" : ...`).
+- Evidence:
+  * `sort_by=created_at&sort_order=desc` accepted with HTTP 200.
+  * `sort_by=unauthorized_field` and `sort_by=password_hash` rejected with HTTP 400 Bad Request.
+
+6. SQL INJECTION RESILIENCE & PARAMETERIZATION
+- Status: PASS
+- Requirement: Malicious inputs in search or sorting cannot alter SQL grammar or leak unauthorized records.
+- Implementation:
+  * Zero string interpolation into raw SQL. All query segments constructed using `Prisma.sql`.
+  * Text queries sanitized via `plainto_tsquery('simple', $q)`.
+- Evidence:
+  * Injection Attempt: `GET /links/search?sort_by=created_at%20OR%201%3D1`
+    Rejected by DTO validation with HTTP 400 Bad Request (`sort-by must be one of the following values...`).
+  * Injection Attempt: `GET /links/search?q='%20OR%201=1%20--`
+    Neutralized by prepared statement parameterization; returns HTTP 200 with `items: [], total: 0`.
+
+7. PERFORMANCE & SCALE GUARDS
+- Status: PASS
+- Requirement: Database index exists to avoid full table scans; page_size bounded to prevent memory blowup.
+- Implementation:
+  * GIN Index created on `to_tsvector('simple', "long_url")`: `links_long_url_search_gin_idx`.
+  * Maximum page size strictly enforced at 100 items.
+- Evidence:
+  * Database catalog query confirms index existence in `pg_indexes`:
+    `CREATE INDEX links_long_url_search_gin_idx ON public.links USING gin (to_tsvector('simple'::regconfig, long_url))`
+  * Requests with `page_size=101` return HTTP 400 Bad Request (`page_size must not be greater than 100`).
+  * Requests with `page_size=100` are accepted (HTTP 200).
+
+8. USER & DEVELOPER EXPERIENCE (UX / DX)
+- Status: PASS
+- Requirement: Predictable response schema and clear, actionable validation error messages.
+- Implementation:
+  * Structured response envelope: `{ items: LinkResponse[], page: number, page_size: number, total: number }`.
+  * Uniform error payload: `{ error: { code: string, message: string, request_id: string } }`.
+- Evidence:
+  * Traced across all live requests with `X-Request-ID` HTTP header for distributed observability.
+  * Validation errors provide exact allowed enum values and numerical bounds.
+
+--------------------------------------------------------------------------------
+AUDIT SCORECARD SUMMARY
+--------------------------------------------------------------------------------
+1. Authentication:         [PASS] - Enforced via JwtAuthGuard (HTTP 401 on missing/bad token)
+2. Ownership Isolation:    [PASS] - Strict multi-tenant isolation via WHERE principal_id = $id
+3. Search & Tag Filtering: [PASS] - PostgreSQL FTS to_tsvector @@ plainto_tsquery + ANY(tags)
+4. Pagination Correctness: [PASS] - Offset (page - 1) * pageSize; disjoint subsets verified
+5. Sorting Controls:       [PASS] - Strict allowlist (created_at, long_url, code, asc/desc)
+6. SQL Injection Safety:   [PASS] - Fully parameterized queries; malicious inputs rejected/neutralized
+7. Performance Guards:     [PASS] - GIN index on long_url; page_size capped at 100
+8. User Experience:        [PASS] - Consistent envelope, clear error messages, request-id tracing
+
+OVERALL AUDIT VERDICT: READY FOR PRODUCTION (PASS: 8/8, FAIL: 0, NEEDS IMPROVEMENT: 0)
+================================================================================

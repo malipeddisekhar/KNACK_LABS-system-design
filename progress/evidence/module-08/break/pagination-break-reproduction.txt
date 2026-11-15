@@ -1,0 +1,51 @@
+================================================================================
+UPSK MODULE 8 - BREAK: PAGINATION OFF-BY-ONE FAILURE REPRODUCTION
+================================================================================
+Injected Bug: const offset = page * pageSize; (api/src/links/links.service.ts)
+Target Database: PostgreSQL 18 (localhost:5432, service: postgresql-x64-18)
+
+[1] Authentication: Logged in as alice.
+[2] Seeding 25 test records with tag "break-25-1794665401329"...
+    Successfully inserted 25 records into PostgreSQL.
+
+[3] Request: GET /links/search?tag=break-25-1794665401329&page=1&page_size=20&sort_by=created_at&sort_order=asc
+    Response Metadata:
+    - page: 1
+    - page_size: 20
+    - total matching: 25
+    - items returned count: 5
+    SQL executed by service: LIMIT 20 OFFSET 20
+    INCORRECT RESULT: Page 1 skipped rows 1..20 due to OFFSET 20!
+    - First item returned on Page 1: https://break-item-21.example.com/record
+    - Last item returned on Page 1: https://break-item-25.example.com/record
+    - Expected count: 20 records (items 01..20), Received count: 5 records (items 21..25).
+
+[4] Request: GET /links/search?tag=break-25-1794665401329&page=2&page_size=20&sort_by=created_at&sort_order=asc
+    Response Metadata:
+    - page: 2
+    - page_size: 20
+    - total matching: 25
+    - items returned count: 0
+    SQL executed by service: LIMIT 20 OFFSET 40
+    INCORRECT RESULT: Page 2 skipped all 25 rows due to OFFSET 40!
+    - Expected count: 5 records (items 21..25), Received count: 0 (empty array []).
+
+[5] Small Dataset Scenario (< 20 records, e.g. 5 records):
+    - total in DB: 5
+    - items returned on page 1: 0
+    SYMPTOM: Response states total: 5, but items is EMPTY ([]). First page shows no results!
+
+[6] Verifying unrelated search functionality:
+    [x] Missing auth token rejected: HTTP 401 (PASS)
+    [x] Invalid token rejected: HTTP 401 (PASS)
+    [x] page_size > 100 rejected: HTTP 400 (PASS)
+    [x] page_size < 1 rejected: HTTP 400 (PASS)
+    [x] Unauthorized sort_by rejected: HTTP 400 (PASS)
+    [x] Total count via SELECT COUNT(*) remains accurate: true (PASS)
+
+[7] Cleaning up test records from PostgreSQL...
+    Removed 30 temporary test records.
+IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+Reproduction completed successfully.

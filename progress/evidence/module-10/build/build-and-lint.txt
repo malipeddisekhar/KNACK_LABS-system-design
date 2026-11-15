@@ -1,0 +1,13 @@
+=== Type-Aware Linter Output (oxlint) ===
+Found 0 warnings and 0 errors.
+Finished in 843ms on 67 files with 111 rules using 16 threads.
+Exit Code: 0
+
+=== TypeScript Compiler & Nest Build (nest build) ===
+Exit Code: 0
+Build artifacts successfully emitted to dist/.
+dist/main.js
+dist/worker.js
+dist/worker.module.js
+dist/app.module.js
+dist/common/bull-config.js

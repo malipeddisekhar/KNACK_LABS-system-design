@@ -1,0 +1,22 @@
+﻿
+> api@0.0.1 test
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js
+
+node : (node:828) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+At line:3 char:1
++ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" test 2 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:828) Expe...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/app.controller.spec.ts
+(node:6412) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/app.module.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        1.409 s, estimated 2 s
+Ran all test suites.

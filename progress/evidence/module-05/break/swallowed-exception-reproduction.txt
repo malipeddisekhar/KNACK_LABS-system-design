@@ -1,0 +1,106 @@
+================================================================================
+MODULE 05 BREAK EVIDENCE: SWALLOWED EXCEPTION AROUND THE DATABASE WRITE
+================================================================================
+Date: 2026-11-13
+Module: 05 - Error Handling & Logging
+Step: BREAK
+Difficulty: Easy (Adaptive Level: Beginner, Decision: B - Graceful Degradation)
+Official Hint: "Search for try/catch around the write."
+
+1. FAULT INJECTION DETAILS
+--------------------------------------------------------------------------------
+File: api/src/links/links.service.ts
+Location: create() method, catch block around `await this.prisma.link.create()` (lines 85-97)
+
+Injected Code:
+```typescript
+      try {
+        const link = await this.prisma.link.create({ ... });
+        return this.toResponse(link);
+      } catch (error) {
+        if (this.isPrismaError(error, 'P2002')) {
+          if (attempt < CODE_GENERATION_ATTEMPTS - 1) {
+            continue;
+          }
+          throw new ServiceUnavailableException('Unable to allocate a short code right now.');
+        }
+
+        // [MODULE 05 BREAK BUG]: Swallowed exception around the write.
+        // Silently swallows database write errors and returns a fake success response.
+        return {
+          id: '00000000-0000-0000-0000-000000000000',
+          code,
+          short_url: `${this.publicBaseUrl}/r/${code}`,
+          long_url: longUrl,
+          created_at: new Date().toISOString(),
+        };
+      }
+```
+
+2. REPRODUCTION COMMAND
+--------------------------------------------------------------------------------
+Command:
+node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json test/module-05-break.e2e-spec.ts
+
+3. OBSERVED FAILURE SYMPTOM & OUTPUT
+--------------------------------------------------------------------------------
+[Request]
+POST /links
+Headers: Authorization: Bearer <valid_jwt>
+Payload: {"long_url": "https://example.com/break-test"}
+
+[Scenario: Database write failure triggered]
+Expected Behavior (Module 05 Spec):
+- Status Code: HTTP 500 Internal Server Error
+- Response Envelope:
+  {
+    "error": {
+      "code": "INTERNAL_SERVER_ERROR",
+      "message": "An unexpected error occurred. Please try again later.",
+      "request_id": "<uuid>"
+    }
+  }
+- Server Log: Structured ERROR log emitted with request_id, route, and error details.
+
+Actual Output (Bug Injected):
+- Status Code: HTTP 201 Created (HTTP 200/201 Success)
+- Response Body:
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "code": "e7hZsiy0",
+    "short_url": "http://localhost:3000/r/e7hZsiy0",
+    "long_url": "https://example.com/break-test",
+    "created_at": "2026-11-13T06:17:25.230Z"
+  }
+- Server Log: ZERO 500 error logs emitted by the global HttpExceptionFilter. The write failure was completely hidden.
+
+[Downstream Symptom]
+Immediate follow-up request by caller using the returned link ID:
+GET /links/00000000-0000-0000-0000-000000000000
+Status Code: HTTP 404 Not Found
+Response Body:
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Link not found.",
+    "request_id": "d7abfe59-e0ed-46e5-afd9-ae793072c0ee"
+  }
+}
+
+Test Assertion Failure:
+  expect(received).toBe(expected) // Object.is equality
+  Expected: 500
+  Received: 201
+
+4. PRODUCTION IMPACT ANALYSIS
+--------------------------------------------------------------------------------
+- Silent Data Loss: Clients are falsely informed that their link was created (201/200), but the record does not exist in the database.
+- Phantom 404s: Downstream users and systems attempting to resolve or fetch the link experience unexpected 404 errors with no traceable origin.
+- Zero Visibility: Because the exception was caught and suppressed in the service layer, it never bubbled up to the global HttpExceptionFilter. As a result, no alert or error log was generated, blinding on-call engineers.
+- DECIDE Tradeoff Linkage: In DECIDE, Option B (graceful degradation) was chosen. This failure demonstrates the fundamental risk of misguided graceful degradation: returning partial or fake success responses silently masks critical infrastructure failures.
+
+5. REGRESSION STATUS
+--------------------------------------------------------------------------------
+Normal database writes and Modules 03-04 happy-path tests continue to pass (21/21 passed).
+Evidence file: progress/evidence/module-05/break/regression-check.txt
+

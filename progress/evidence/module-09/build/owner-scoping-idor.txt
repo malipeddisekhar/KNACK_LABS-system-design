@@ -1,0 +1,48 @@
+================================================================================
+Module 9 BUILD - Test 4: Owner Scoping (IDOR Prevention)
+================================================================================
+Workspace: D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api
+Test File: test/module-09.e2e-spec.ts
+Target Database: url_shortener_test (dedicated isolated test database)
+Original Database: url_shortener (untouched)
+
+COMMAND:
+node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json module-09.e2e-spec.ts --runInBand
+
+DATABASE SAFETY VERIFICATION:
+- Jest setupFiles loaded: D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\test\setup-test-db.ts
+- PrismaService active database connection verified via SELECT current_database(): url_shortener_test
+- Dual-layer safety guard verified
+
+TEST OUTPUT:
+PASS test/module-09.e2e-spec.ts (14.022 s)
+  Module 9 E2E Test Suite (e2e)
+    1. Authenticated link creation
+      √ creates a link via POST /links when authenticated and returns HTTP 201 with destination URL (92 ms)
+    2. URL redirect
+      √ redirects GET /r/:code to the destination URL with HTTP 302 and exact Location header (835 ms)
+    3. Protected-route authentication
+      √ rejects unauthenticated GET /links with HTTP 401 and returns no protected data (6 ms)
+    4. Owner scoping (IDOR prevention)
+      √ returns HTTP 404 when Bob attempts to access Alice's link via GET /links/:id (18 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        15.727 s
+Ran all test suites matching module-09.e2e-spec.ts.
+
+ASSERTIONS VERIFIED:
+1. Authenticated as Alice (principal-alice) and Bob (principal-bob).
+2. Alice created a private link:
+   'https://example.com/module-09/build/alice-private-link'
+3. Verified Alice's link is persisted in url_shortener_test with principalId 'principal-alice'.
+4. Bob sent an authenticated request to GET /links/:aliceLinkId.
+5. Response returned HTTP 404 Not Found, matching the Module 4 ownership decision (avoiding existence leakage).
+6. Response body confirmed to contain zero details regarding Alice's link:
+   - statusCode: 404
+   - message: 'Link not found.'
+   - No 'long_url', 'code', 'id', or 'short_url' returned.
+7. Deterministic cleanup executed in afterAll:
+   - url_shortener_test counts: { links: '0', clicks: '0' }
+   - url_shortener (dev) counts: { links: '13', clicks: '255' } (untouched)

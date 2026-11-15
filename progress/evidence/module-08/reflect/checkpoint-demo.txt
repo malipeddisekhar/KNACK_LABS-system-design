@@ -1,0 +1,96 @@
+================================================================================
+UPSK MODULE 8 - REFLECT: CHECKPOINT DEMO (SEARCH & SQL INJECTION)
+================================================================================
+Timestamp: 2026-11-14T14:35:34Z
+Base URL: http://localhost:3000
+
+1. AUTHENTICATION (DEV USER: ALICE)
+--------------------------------------------------------------------------------
+Command:
+curl.exe -s -X POST http://localhost:3000/auth/login \
+  --json '{"username":"alice","password":"<REDACTED>"}'
+
+Response:
+{
+  "access_token": "<REDACTED>",
+  "token_type": "Bearer",
+  "expires_in": "15m"
+}
+
+2. REAL GET /links/search REQUEST WITH PAGINATION (page=1, page_size=2)
+--------------------------------------------------------------------------------
+Command:
+curl.exe -i -H "Authorization: Bearer <ALICE_TOKEN>" \
+  "http://localhost:3000/links/search?page=1&page_size=2"
+
+Response Headers:
+HTTP/1.1 200 OK
+X-Powered-By: Express
+X-Request-ID: 09e71096-28ac-4559-9e0c-479ac4c84307
+Content-Type: application/json; charset=utf-8
+Content-Length: 529
+Date: Sat, 14 Nov 2026 14:35:34 GMT
+Connection: keep-alive
+
+Response Body:
+{
+  "items": [
+    {
+      "id": "0179cca6-7f92-4bf5-aa72-700aecda5273",
+      "code": "QpGtNoHB",
+      "short_url": "http://localhost:3000/r/QpGtNoHB",
+      "long_url": "https://upsk-module-07-verification.example.com/1794635136873",
+      "created_at": "2026-11-14T05:45:36.955Z",
+      "tags": [
+        "module-07",
+        "analytics-verification"
+      ]
+    },
+    {
+      "id": "609b14e4-2561-43c1-9fd5-48e0921642ce",
+      "code": "aMk68BKy",
+      "short_url": "http://localhost:3000/r/aMk68BKy",
+      "long_url": "https://fallback-verified.example.org/",
+      "created_at": "2026-11-14T04:27:11.493Z",
+      "tags": []
+    }
+  ],
+  "page": 1,
+  "page_size": 2,
+  "total": 9
+}
+
+Observation:
+- Correctly returns exactly 2 items for page_size=2.
+- Metadata accurately reflects page: 1, page_size: 2, total: 9.
+
+3. SQL INJECTION SECURITY ATTEMPT: ' OR 1=1 --
+--------------------------------------------------------------------------------
+Command:
+curl.exe -i -H "Authorization: Bearer <ALICE_TOKEN>" \
+  "http://localhost:3000/links/search?q='%20OR%201=1%20--"
+
+Response Headers:
+HTTP/1.1 200 OK
+X-Powered-By: Express
+X-Request-ID: ef77412a-aa6a-47b3-8960-8caeee9758d7
+Content-Type: application/json; charset=utf-8
+Content-Length: 46
+Date: Sat, 14 Nov 2026 14:35:34 GMT
+Connection: keep-alive
+
+Response Body:
+{
+  "items": [],
+  "page": 1,
+  "page_size": 20,
+  "total": 0
+}
+
+Observation & Database Behavior:
+- The SQL injection payload `' OR 1=1 --` is passed directly into parameterized SQL.
+- PostgreSQL FTS plainto_tsquery('simple', $q) treats the input as plain text lexemes to search for.
+- It does NOT alter SQL query structure, does NOT bypass principal_id ownership, and does NOT leak rows.
+- The query safely returns HTTP 200 OK with 0 matching rows (`total: 0, items: []`).
+================================================================================
+

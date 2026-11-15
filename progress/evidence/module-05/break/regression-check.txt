@@ -1,0 +1,18 @@
+﻿node : (node:27824) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+At line:1 char:181
++ ... space\api"; node --experimental-vm-modules ./node_modules/jest/bin/je ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:27824) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:20180) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS test/module-04.e2e-spec.ts
+PASS test/module-03.e2e-spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       21 passed, 21 total
+Snapshots:   0 total
+Time:        3.461 s
+Ran all test suites matching test/module-03.e2e-spec.ts|test/module-04.e2e-spec.ts.

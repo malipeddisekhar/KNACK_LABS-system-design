@@ -1,0 +1,237 @@
+
+> api@0.0.1 test:e2e
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json --runInBand test/module-08.e2e-spec.ts
+
+(node:22020) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+  console.error
+    Error: getaddrinfo ENOTFOUND enabling-drake-189836.upstash.io
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+      errno: -3008,
+      code: 'ENOTFOUND',
+      syscall: 'getaddrinfo',
+      hostname: 'enabling-drake-189836.upstash.io'
+    }
+
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/queue-base.js:89:25)
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/worker.js:184:22)
+      at RedisQueueBackend.<anonymous> (../node_modules/bullmq/dist/cjs/classes/queue-base.js:36:50)
+      at RedisConnection.<anonymous> (../node_modules/bullmq/dist/cjs/classes/redis-queue-backend.js:176:49)
+      at EventEmitter.RedisConnection.handleClientError (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:145:18)
+      at EventEmitter.silentEmit (../node_modules/ioredis/built/Redis.js:581:30)
+      at TLSSocket.<anonymous> (../node_modules/ioredis/built/redis/event_handler.js:360:14)
+
+  console.error
+    Error: getaddrinfo ENOTFOUND enabling-drake-189836.upstash.io
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+      errno: -3008,
+      code: 'ENOTFOUND',
+      syscall: 'getaddrinfo',
+      hostname: 'enabling-drake-189836.upstash.io'
+    }
+
+      at Queue.emit (../node_modules/bullmq/dist/cjs/classes/queue-base.js:89:25)
+      at Queue.emit (../node_modules/bullmq/dist/cjs/classes/queue.js:57:22)
+      at RedisQueueBackend.<anonymous> (../node_modules/bullmq/dist/cjs/classes/queue-base.js:36:50)
+      at RedisConnection.<anonymous> (../node_modules/bullmq/dist/cjs/classes/redis-queue-backend.js:176:49)
+      at EventEmitter.RedisConnection.handleClientError (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:145:18)
+      at EventEmitter.silentEmit (../node_modules/ioredis/built/Redis.js:581:30)
+      at TLSSocket.<anonymous> (../node_modules/ioredis/built/redis/event_handler.js:360:14)
+
+  console.error
+    Error: getaddrinfo ENOTFOUND enabling-drake-189836.upstash.io
+        at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+      errno: -3008,
+      code: 'ENOTFOUND',
+      syscall: 'getaddrinfo',
+      hostname: 'enabling-drake-189836.upstash.io'
+    }
+
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/queue-base.js:89:25)
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/worker.js:184:22)
+      at RedisQueueBackend.<anonymous> (../node_modules/bullmq/dist/cjs/classes/queue-base.js:36:50)
+      at RedisConnection.<anonymous> (../node_modules/bullmq/dist/cjs/classes/redis-queue-backend.js:180:61)
+      at EventEmitter.RedisConnection.handleClientError (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:145:18)
+      at EventEmitter.silentEmit (../node_modules/ioredis/built/Redis.js:581:30)
+      at TLSSocket.<anonymous> (../node_modules/ioredis/built/redis/event_handler.js:360:14)
+
+  console.error
+    Error: Unhandled error. (Error: Connection is closed.
+        at EventEmitter.connectionCloseHandler (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\ioredis\built\Redis.js:233:28)
+        at EventEmitter.wrapper (node:events:639:12)
+        at EventEmitter.emit (node:events:526:24)
+        at processTicksAndRejections (node:internal/process/task_queues:85:11))
+        at getUnhandledErrorException (node:events:477:15)
+        at Worker.emit (node:events:502:16)
+        at Worker.emit (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\queue-base.js:81:26)
+        at Worker.emit (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\worker.js:184:22)
+        at RedisQueueBackend.<anonymous> (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\queue-base.js:36:50)
+        at RedisQueueBackend.emit (node:events:514:20)
+        at RedisConnection.<anonymous> (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\redis-queue-backend.js:180:61)
+        at RedisConnection.emit (node:events:514:20)
+        at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\redis-connection.js:162:22
+        at processTicksAndRejections (node:internal/process/task_queues:104:5) {
+      code: 'ERR_UNHANDLED_ERROR',
+      context: Error: Connection is closed.
+          at EventEmitter.connectionCloseHandler (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\ioredis\built\Redis.js:233:28)
+          at EventEmitter.wrapper (node:events:639:12)
+          at EventEmitter.emit (node:events:526:24)
+          at processTicksAndRejections (node:internal/process/task_queues:85:11)
+    }
+
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/queue-base.js:89:25)
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/worker.js:184:22)
+      at RedisQueueBackend.<anonymous> (../node_modules/bullmq/dist/cjs/classes/queue-base.js:36:50)
+      at RedisConnection.<anonymous> (../node_modules/bullmq/dist/cjs/classes/redis-queue-backend.js:180:61)
+      at ../node_modules/bullmq/dist/cjs/classes/redis-connection.js:162:22
+
+  console.error
+    Error: Unhandled error. (Error: Connection is closed.
+        at EventEmitter.connectionCloseHandler (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\ioredis\built\Redis.js:233:28)
+        at EventEmitter.wrapper (node:events:639:12)
+        at EventEmitter.emit (node:events:526:24)
+        at processTicksAndRejections (node:internal/process/task_queues:85:11))
+        at getUnhandledErrorException (node:events:477:15)
+        at Queue.emit (node:events:502:16)
+        at Queue.emit (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\queue-base.js:81:26)
+        at Queue.emit (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\queue.js:57:22)
+        at RedisQueueBackend.<anonymous> (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\queue-base.js:36:50)
+        at RedisQueueBackend.emit (node:events:514:20)
+        at RedisConnection.<anonymous> (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\redis-queue-backend.js:176:49)
+        at RedisConnection.emit (node:events:514:20)
+        at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\redis-connection.js:162:22
+        at processTicksAndRejections (node:internal/process/task_queues:104:5) {
+      code: 'ERR_UNHANDLED_ERROR',
+      context: Error: Connection is closed.
+          at EventEmitter.connectionCloseHandler (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\ioredis\built\Redis.js:233:28)
+          at EventEmitter.wrapper (node:events:639:12)
+          at EventEmitter.emit (node:events:526:24)
+          at processTicksAndRejections (node:internal/process/task_queues:85:11)
+    }
+
+      at Queue.emit (../node_modules/bullmq/dist/cjs/classes/queue-base.js:89:25)
+      at Queue.emit (../node_modules/bullmq/dist/cjs/classes/queue.js:57:22)
+      at RedisQueueBackend.<anonymous> (../node_modules/bullmq/dist/cjs/classes/queue-base.js:36:50)
+      at RedisConnection.<anonymous> (../node_modules/bullmq/dist/cjs/classes/redis-queue-backend.js:176:49)
+      at ../node_modules/bullmq/dist/cjs/classes/redis-connection.js:162:22
+
+  console.error
+    Error: Unhandled error. (Error: Connection is closed.
+        at EventEmitter.connectionCloseHandler (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\ioredis\built\Redis.js:233:28)
+        at EventEmitter.wrapper (node:events:639:12)
+        at EventEmitter.emit (node:events:526:24)
+        at processTicksAndRejections (node:internal/process/task_queues:85:11))
+        at getUnhandledErrorException (node:events:477:15)
+        at Worker.emit (node:events:502:16)
+        at Worker.emit (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\queue-base.js:81:26)
+        at Worker.emit (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\worker.js:184:22)
+        at RedisQueueBackend.<anonymous> (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\queue-base.js:36:50)
+        at RedisQueueBackend.emit (node:events:514:20)
+        at RedisConnection.<anonymous> (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\redis-queue-backend.js:176:49)
+        at RedisConnection.emit (node:events:514:20)
+        at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\redis-connection.js:162:22
+        at processTicksAndRejections (node:internal/process/task_queues:104:5) {
+      code: 'ERR_UNHANDLED_ERROR',
+      context: Error: Connection is closed.
+          at EventEmitter.connectionCloseHandler (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\ioredis\built\Redis.js:233:28)
+          at EventEmitter.wrapper (node:events:639:12)
+          at EventEmitter.emit (node:events:526:24)
+          at processTicksAndRejections (node:internal/process/task_queues:85:11)
+    }
+
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/queue-base.js:89:25)
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/worker.js:184:22)
+      at RedisQueueBackend.<anonymous> (../node_modules/bullmq/dist/cjs/classes/queue-base.js:36:50)
+      at RedisConnection.<anonymous> (../node_modules/bullmq/dist/cjs/classes/redis-queue-backend.js:176:49)
+      at ../node_modules/bullmq/dist/cjs/classes/redis-connection.js:162:22
+
+  console.error
+    Error: Unhandled error. (Error: Connection is closed.
+        at EventEmitter.connectionCloseHandler (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\ioredis\built\Redis.js:233:28)
+        at EventEmitter.wrapper (node:events:639:12)
+        at EventEmitter.emit (node:events:526:24)
+        at processTicksAndRejections (node:internal/process/task_queues:85:11))
+        at getUnhandledErrorException (node:events:477:15)
+        at Worker.emit (node:events:502:16)
+        at Worker.emit (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\queue-base.js:81:26)
+        at Worker.emit (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\worker.js:184:22)
+        at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\worker.js:823:30
+        at processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\worker.js:799:13
+        at Worker.close (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\bullmq\dist\cjs\classes\worker.js:831:16)
+        at AnalyticsProcessor.onModuleDestroy (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\src\analytics\analytics.processor.ts:24:9)
+        at async Promise.allSettled (index 0)
+        at callModuleDestroyHook (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\hooks\on-module-destroy.hook.js:38:25)
+        at Proxy.callDestroyHook (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\nest-application-context.js:292:13)
+        at Proxy.runShutdownSequence (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\nest-application-context.js:159:9)
+        at Proxy.close (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\@nestjs\core\nest-application-context.js:133:9)
+        at Object.<anonymous> (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\test\module-08.e2e-spec.ts:38:5) {
+      code: 'ERR_UNHANDLED_ERROR',
+      context: Error: Connection is closed.
+          at EventEmitter.connectionCloseHandler (D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\node_modules\ioredis\built\Redis.js:233:28)
+          at EventEmitter.wrapper (node:events:639:12)
+          at EventEmitter.emit (node:events:526:24)
+          at processTicksAndRejections (node:internal/process/task_queues:85:11)
+    }
+
+      22 |     try {
+      23 |       if (this.worker) {
+    > 24 |         await this.worker.close();
+         |         ^
+      25 |       }
+      26 |     } catch {
+      27 |       // Ignore worker close error during teardown
+
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/queue-base.js:89:25)
+      at Worker.emit (../node_modules/bullmq/dist/cjs/classes/worker.js:184:22)
+      at ../node_modules/bullmq/dist/cjs/classes/worker.js:823:30
+      at ../node_modules/bullmq/dist/cjs/classes/worker.js:799:13
+      at Worker.close (../node_modules/bullmq/dist/cjs/classes/worker.js:831:16)
+      at AnalyticsProcessor.onModuleDestroy (../src/analytics/analytics.processor.ts:24:9)
+          at async Promise.allSettled (index 0)
+      at callModuleDestroyHook (../node_modules/@nestjs/core/hooks/on-module-destroy.hook.js:38:25)
+      at Proxy.callDestroyHook (../node_modules/@nestjs/core/nest-application-context.js:292:13)
+      at Proxy.runShutdownSequence (../node_modules/@nestjs/core/nest-application-context.js:159:9)
+      at Proxy.close (../node_modules/@nestjs/core/nest-application-context.js:133:9)
+      at Object.<anonymous> (module-08.e2e-spec.ts:38:5)
+
+FAIL test/module-08.e2e-spec.ts (29.059 s)
+  ● Module 8 Full-Text Search & Pagination (e2e) › rejects unauthenticated and invalid token search requests with HTTP 401
+
+    connect EACCES 127.0.0.1:64774
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › searches links by full-text query using to_tsvector and plainto_tsquery
+
+    connect EACCES 127.0.0.1:64777
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › filters search results by tag and supports combined query+tag filtering
+
+    connect EACCES 127.0.0.1:64779
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › handles pagination correctly with page and page_size metadata
+
+    connect EACCES 127.0.0.1:64781
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › enforces page_size limits (1 to 100) and rejects invalid bounds
+
+    connect EACCES 127.0.0.1:64783
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › enforces owner-scoped search isolation across distinct principals
+
+    connect EACCES 127.0.0.1:64785
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › validates dynamic sorting and rejects unauthorized sort fields
+
+    connect EACCES 127.0.0.1:64788
+
+Test Suites: 1 failed, 1 total
+Tests:       7 failed, 7 total
+Snapshots:   0 total
+Time:        31.932 s
+Ran all test suites matching test/module-08.e2e-spec.ts.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
+
+BREAK reproduction timestamp: 2026-11-14T14:50:57.6872537+05:30
+Exit code: 1

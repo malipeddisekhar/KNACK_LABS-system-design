@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Link {
+  id          String       @id @default(uuid()) @db.Uuid
+  code        String       @unique
+  longUrl     String       @map("long_url") @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  principalId String       @map("principal_id")
+  expiresAt   DateTime?    @map("expires_at") @db.Timestamptz(6)
+  tags        String[]     @default([])
+  clickEvents ClickEvent[]
+
+  @@index([principalId])
+  @@map("links")
+}
+
+model ClickEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  eventId   String   @unique @default(uuid()) @map("event_id")
+  linkId    String   @map("link_id") @db.Uuid
+  clickedAt DateTime @default(now()) @map("clicked_at") @db.Timestamptz(6)
+  userAgent String   @map("user_agent") @db.Text
+  referrer  String   @db.Text
+  ipHash    String   @map("ip_hash") @db.Text
+  link      Link     @relation(fields: [linkId], references: [id])
+
+  @@index([linkId, clickedAt])
+  @@map("click_events")
+}

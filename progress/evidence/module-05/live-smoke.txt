@@ -1,0 +1,15 @@
+﻿=== GET /health (200) ===
+X-Request-ID: f0f92e5e-37ce-4300-a67a-39d9f352c6e8
+Body: {"ok":true}
+
+=== GET /nonexistent (404) ===
+X-Request-ID: 62355703-98f5-4780-bec4-d77e92c5b8b5
+Body: 
+ID in body matches header: False
+
+=== GET /links (401) ===
+X-Request-ID: dfe3abce-ad8c-484e-a98b-b246e2ad6966
+Body: 
+
+=== Sentinel secret leak check ===
+Sentinel value present in response body: False

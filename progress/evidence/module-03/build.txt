@@ -1,0 +1,6 @@
+Command: npm run build
+
+> api@0.0.1 build
+> nest build
+
+Exit code: 0

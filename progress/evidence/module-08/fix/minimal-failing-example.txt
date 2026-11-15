@@ -1,0 +1,64 @@
+================================================================================
+UPSK MODULE 8 - FIX: MINIMAL FAILING EXAMPLE
+================================================================================
+File: api/src/links/pagination-boundary.spec.ts
+
+1. MINIMAL CODE DEMONSTRATING THE OFF-BY-ONE BUG:
+--------------------------------------------------------------------------------
+// Original incorrect calculation in links.service.ts:
+function calculateBuggyOffset(page: number, pageSize: number): number {
+  return page * pageSize;
+}
+
+// Corrected calculation in links.service.ts:
+function calculateCorrectOffset(page: number, pageSize: number): number {
+  return (page - 1) * pageSize;
+}
+
+2. DEMONSTRATION & ASSERTION TRACE:
+--------------------------------------------------------------------------------
+Scenario: User accesses Page 1 with pageSize = 20 on a dataset of 5 records.
+
+A. Buggy calculation:
+   const page = 1;
+   const pageSize = 20;
+   const offset = calculateBuggyOffset(page, pageSize);
+   // offset = 1 * 20 = 20
+
+   SQL executed:
+   SELECT * FROM "links" WHERE "principal_id" = $1 LIMIT 20 OFFSET 20;
+
+   Result:
+   - Total matching records in database: 5
+   - Rows skipped by OFFSET 20: 5
+   - Rows returned: 0 (empty array `[]`)
+   - Failure: Page 1 displays 0 records even though 5 records exist. Records 1..20 are skipped.
+
+B. Correct calculation:
+   const page = 1;
+   const pageSize = 20;
+   const offset = calculateCorrectOffset(page, pageSize);
+   // offset = (1 - 1) * 20 = 0
+
+   SQL executed:
+   SELECT * FROM "links" WHERE "principal_id" = $1 LIMIT 20 OFFSET 0;
+
+   Result:
+   - Total matching records in database: 5
+   - Rows skipped by OFFSET 0: 0
+   - Rows returned: 5 (all matching records)
+   - Success: Page 1 begins at index 0 and returns all available records.
+
+3. AUTOMATED TEST EVIDENCE:
+--------------------------------------------------------------------------------
+PASS src/links/pagination-boundary.spec.ts
+  Module 8 Pagination Offset & Boundaries
+    Minimal Failing Example (Original Buggy Calculation)
+      √ demonstrates that page * pageSize causes an off-by-one error by skipping the first page (2 ms)
+      √ demonstrates that page 2 skips 2 * pageSize items
+    Corrected Offset Calculation & Boundary Verification
+      √ page 1 produces offset 0
+      √ page 2 produces offset pageSize
+      √ handles custom page_size 100 boundaries correctly
+      √ returns all matching records when result set is smaller than page_size
+================================================================================

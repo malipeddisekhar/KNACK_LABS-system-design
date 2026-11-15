@@ -1,0 +1,53 @@
+=== Module 10 BUILD: Docker Production Packaging Evidence ===
+
+1. Created Artifacts:
+   - api/Dockerfile (Multi-stage production build)
+   - api/.dockerignore (Strict exclusion of secrets, env files, tests, and host node_modules)
+
+2. Multi-Stage Dockerfile Architecture:
+   - Stage 1: `dependencies` (node:22-bookworm-slim)
+     * Installs OpenSSL and CA certificates for TLS Prisma engine.
+     * Copies package*.json.
+     * Executes `npm ci --omit=dev` for reproducible production dependencies.
+     * Installs `prisma@7.10.1` and `dotenv@18.0.9` into node_modules via `npm install --no-save` so one-off migration jobs run offline without devDependencies.
+   - Stage 2: `builder` (node:22-bookworm-slim)
+     * Installs full dependencies via `npm ci`.
+     * Copies `prisma7.config.ts` and `prisma/`.
+     * Generates Prisma 7 client into `src/generated/prisma` via `npx prisma generate`.
+     * Compiles NestJS application into `dist/` (including `dist/generated/prisma`) via `npm run build`.
+   - Stage 3: `runner` (node:22-bookworm-slim)
+     * Minimal production runtime environment (`NODE_ENV=production`, `PORT=3000`).
+     * Places local binaries on path (`ENV PATH="/usr/src/app/node_modules/.bin:$PATH"`).
+     * Copies `node_modules` from `dependencies`.
+     * Copies `package.json` for npm script execution.
+     * Copies `dist` from `builder`.
+     * Copies `prisma7.config.ts` and `prisma/` for one-off migration job.
+     * Runs as non-root user (`USER node`).
+     * Exposes port 3000.
+     * Default CMD: `["npm", "run", "start:prod"]`.
+
+3. Three Supported Execution Commands:
+   - Command 1 (API): `npm run start:prod` (boots NestJS API via dist/main.js on 0.0.0.0:3000 without starting consumer)
+   - Command 2 (Worker): `npm run worker` (boots NestJS background worker via dist/worker.js without HTTP listeners or web env vars)
+   - Command 3 (Migration Job): `prisma migrate deploy` or `npx prisma migrate deploy` (runs standalone one-off migration using production DATABASE_URL and prisma7.config.ts)
+
+4. Migration Safety & Autostart Policy:
+   - Migrations DO NOT run automatically when API or Worker starts.
+   - Neither main.ts nor worker.ts invokes Prisma migrations on startup.
+   - Migrations are decoupled and executed strictly as explicit one-off jobs.
+
+5. Image Hygiene & Secrets Protection:
+   - `.dockerignore` excludes: .env, .env.*, *.env, *.local, node_modules, dist, test/, tests/, coverage/, src/**/*.spec.ts, src/**/*.test.ts, jest*.json, .oxlintrc.json, logs, scratch/, progress/.
+   - No sensitive files, credentials, tests, or compiler tools in final runner image.
+
+6. Docker Build Verification & Limitations:
+   - Docker CLI: Docker version 29.9.2, build a82e528
+   - Docker Build Verification Command: `docker build -t test-build .`
+   - Result:
+     ERROR: failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+   - Cause: Windows Subsystem for Linux (WSL) has no installed Linux distributions on this Windows host (`wsl --list` reports no installed distributions), so the Docker Desktop Linux daemon cannot run locally.
+   - The Dockerfile and .dockerignore strictly adhere to POSIX/Linux standard container syntax and are ready for remote or CI Docker builds (e.g. GitHub Actions, Railway).
+
+7. Prisma 7 Setup Analysis:
+   - No structural changes to Prisma 7 were required.
+   - The existing `prisma7.config.ts` and `schema.prisma` (generating client to `../src/generated/prisma`) build cleanly with NestJS into `dist/generated/prisma` and work seamlessly with `prisma migrate deploy`.

@@ -1,0 +1,52 @@
+﻿
+> api@0.0.1 test:e2e
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json
+
+node : (node:11904) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+At line:1 char:379
++ ... oding utf8; node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cl ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:11904) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12044) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:4616) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS test/app.e2e-spec.ts
+(node:5836) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[31m[Nest] 11904  - [39m13/11/2026, 11:59:12 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"95901f3b-3
+c26-405b-80f7-7f6c70904225","method":"POST","route":"/links","status_code":400,"error_code":"BAD_REQUEST","message":"lo
+ng_url must be an absolute HTTP or HTTPS URL without control characters, backslashes, or credentials."}[39m
+[31m[Nest] 11904  - [39m13/11/2026, 11:59:12 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"28f3dd66-0
+881-4cc6-9802-41f733fd3b2d","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"In
+valid or expired token."}[39m
+[31m[Nest] 11904  - [39m13/11/2026, 11:59:12 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"be588a3f-4
+28c-46dd-8698-78378de8400a","method":"GET","route":"/nonexistent-route","status_code":404,"error_code":"NOT_FOUND","mes
+sage":"Cannot GET /nonexistent-route"}[39m
+[31m[Nest] 11904  - [39m13/11/2026, 11:59:12 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"0d6e4b70-9
+8b3-499b-98b6-75982cf863c7","method":"GET","route":"/nonexistent-route","status_code":404,"error_code":"NOT_FOUND","mes
+sage":"Cannot GET /nonexistent-route"}[39m
+[31m[Nest] 11904  - [39m13/11/2026, 11:59:12 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"f36e17fc-2
+d6b-49c8-8400-4f754d85e33a","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"In
+valid or expired token."}[39m
+[31m[Nest] 11904  - [39m13/11/2026, 11:59:12 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"8b3053fc-4
+4a0-4545-b67c-686ae95058e7","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"In
+valid or expired token."}[39m
+[31m[Nest] 11904  - [39m13/11/2026, 11:59:12 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"7aaf2406-a
+3ba-4110-9905-5edced2eec38","method":"POST","route":"/links","status_code":500,"error_code":"INTERNAL_SERVER_ERROR","me
+ssage":"Database connection unexpectedly closed during write"}[39m
+[31m[Nest] 11904  - [39m13/11/2026, 11:59:12 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"521bddd1-d
+bc1-49a2-8924-385b57dd1ef7","method":"POST","route":"/links","status_code":503,"error_code":"SERVICE_UNAVAILABLE","mess
+age":"Unable to allocate a short code right now."}[39m
+PASS test/module-05.e2e-spec.ts
+PASS test/module-04.e2e-spec.ts
+PASS test/module-03.e2e-spec.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       35 passed, 35 total
+Snapshots:   0 total
+Time:        3.552 s
+Ran all test suites.

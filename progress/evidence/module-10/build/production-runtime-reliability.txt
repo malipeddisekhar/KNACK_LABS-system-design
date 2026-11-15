@@ -1,0 +1,82 @@
+=== Module 10 BUILD: Production Runtime Reliability Evidence ===
+
+1. Host and Port Binding:
+   - Configured NestJS to bind explicitly to 0.0.0.0: `await app.listen(port, '0.0.0.0')`.
+   - Read from `process.env.PORT` with safe fallback to port 3000 when PORT is omitted.
+   - Validates PORT is an integer between 1 and 65535.
+   - Production port is configurable and not hardcoded.
+
+2. Health and Readiness Endpoints:
+   - Liveness: `GET /health` remains a lightweight liveness check returning `{ ok: true }` (HTTP 200).
+   - Readiness: `GET /ready` checks both PostgreSQL (via `SELECT 1;`) and Redis (via `cacheService.ping()`).
+   - Healthy Response: HTTP 200
+     {
+       "status": "ready",
+       "checks": {
+         "database": "up",
+         "redis": "up"
+       }
+     }
+   - Degraded Response: HTTP 503 Service Unavailable
+     {
+       "status": "not_ready",
+       "checks": {
+         "database": "down",
+         "redis": "up"
+       }
+     }
+   - Security: Zero credentials, connection strings, hosts, or stack traces exposed. Internal errors logged server-side only.
+
+3. Bounded Timeouts:
+   - HTTP Server:
+     * Request execution timeout: 30,000ms (`server.setTimeout(30000)`).
+     * Keep-alive timeout: 65,000ms (`server.keepAliveTimeout = 65000`).
+     * Headers timeout: 66,000ms (`server.headersTimeout = 66000`).
+   - PostgreSQL (Prisma adapter pg):
+     * Connection timeout: 5,000ms (`connectionTimeoutMillis: 5000`).
+     * Pool idle timeout: 30,000ms (`idleTimeoutMillis: 30000`).
+   - Redis:
+     * Connection timeout: 3,000ms (`connectTimeout: 3000`).
+     * Request retries: `maxRetriesPerRequest: 1`, capped retryStrategy.
+   - BullMQ Queue:
+     * Enqueue race timeout: 2,000ms with durable database fallback.
+     * Bull connection timeout: 5,000ms.
+   - Readiness Checks:
+     * Bounded 2,000ms race timeout per dependency check.
+   - Graceful Shutdown Draining:
+     * Bounded 10,000ms timeout before forcing process exit.
+
+4. Graceful Shutdown:
+   - Worker (`worker.ts`):
+     * Listens for `SIGINT` and `SIGTERM`.
+     * `isShuttingDown` guard prevents duplicate execution on repeated or overlapping signals.
+     * Invokes `await app.close()` with bounded 10s timeout.
+     * Triggers `AnalyticsProcessor.onModuleDestroy()` (`await this.worker.close()`) to drain in-flight jobs without pulling new tasks.
+     * Triggers `PrismaService.onModuleDestroy()` (`await this.$disconnect()`) to close database connections cleanly.
+   - API (`main.ts`):
+     * `app.enableShutdownHooks()` safely closes the HTTP server, stops accepting new requests, and closes Prisma, Cache, and Queue resources in order.
+
+5. Verification Results:
+   - Lint (`oxlint --type-aware src/ test/`): 0 warnings, 0 errors on 69 files.
+   - Build (`nest build`): Compiled cleanly to dist/.
+   - Unit Tests: 6 passed, 6 total suites; 28 passed, 28 total tests.
+     * src/ready.controller.spec.ts (4/4 passed)
+     * src/app.module.spec.ts (6/6 passed)
+     * src/worker.module.spec.ts (5/5 passed)
+     * src/analytics/analytics.service.spec.ts (6/6 passed)
+     * src/app.controller.spec.ts (3/3 passed)
+     * src/links/pagination-boundary.spec.ts (4/4 passed)
+   - E2E Tests: 9 passed, 9 total suites; 69 passed, 69 total tests.
+     * test/module-10.e2e-spec.ts (8/8 passed)
+     * test/module-09.e2e-spec.ts (6/6 passed)
+     * test/module-08.e2e-spec.ts (13/13 passed)
+     * test/module-07.e2e-spec.ts (6/6 passed)
+     * test/module-06.e2e-spec.ts (8/8 passed)
+     * test/module-05.e2e-spec.ts (12/12 passed)
+     * test/module-04.e2e-spec.ts (3/3 passed)
+     * test/module-03.e2e-spec.ts (10/10 passed)
+     * test/app.e2e-spec.ts (3/3 passed)
+
+6. Database Safety:
+   - Target database: url_shortener_test exclusively used.
+   - Development/production database: url_shortener remains untouched (13 links, 255 clicks, 4 migrations).

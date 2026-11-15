@@ -1,0 +1,6 @@
+﻿
+> api@0.0.1 lint
+> oxlint --type-aware src/ test/
+
+Found 0 warnings and 0 errors.
+Finished in 4.9s on 50 files with 111 rules using 16 threads.

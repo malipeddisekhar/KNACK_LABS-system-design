@@ -1,0 +1,32 @@
+Module 9 BREAK — controlled unsafe test-database target
+
+Command: node --experimental-vm-modules ./node_modules/jest/bin/jest.js --no-cache --config ./test/jest-e2e.json module-09.e2e-spec.ts --runInBand
+Simulation flag: UPSK_BREAK_SIMULATE_UNSAFE_DB_TARGET=1
+Synthetic target database name: url_shortener
+Synthetic host: break-simulation.invalid (reserved .invalid domain)
+Expected safety behavior: existing setup guard rejects the non-test database name before Nest app setup or Prisma connection.
+
+Exit code: 1
+
+Sanitized command output:
+FAIL test/module-09.e2e-spec.ts
+  ● Test suite failed to run
+
+    [DATABASE SAFETY GUARD] Refusing to run tests: Target test database must be exactly 'url_shortener_test', but found 'url_shortener'. Tests must never run against development or production databases!
+
+      65 |   throw new Error(
+      66 |     '[DATABASE SAFETY GUARD] Missing TEST_DATABASE_URL: test execution halted immediately. TEST_DATABASE_URL must be explicitly configured and cannot be derived from DATABASE_URL.',
+    > 67 |   );
+         |     ^
+      68 | }
+      69 |
+      70 | // 3. Requirement 1: Must target only 'url_shortener_test'
+
+      at Object.<anonymous> (setup-test-db.ts:67:11)
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        0.464 s
+Ran all test suites matching module-09.e2e-spec.ts.
+

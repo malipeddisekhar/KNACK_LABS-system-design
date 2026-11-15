@@ -1,0 +1,105 @@
+
+> api@0.0.1 test:e2e
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json test/module-08.e2e-spec.ts
+
+(node:16476) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+  console.warn
+    IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+  console.warn
+    IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+  console.warn
+    IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+FAIL test/module-08.e2e-spec.ts (8.463 s)
+  Module 8 Full-Text Search & Pagination (e2e)
+    √ rejects unauthenticated and invalid token search requests with HTTP 401 (194 ms)
+    × searches links by full-text query using to_tsvector and plainto_tsquery (420 ms)
+    × filters search results by tag and supports combined query+tag filtering (21 ms)
+    × handles pagination correctly with page and page_size metadata (regression test for off-by-one fix) (34 ms)
+    √ enforces page_size limits (1 to 100) and rejects invalid bounds (17 ms)
+    × enforces owner-scoped search isolation across distinct principals (14 ms)
+    √ validates dynamic sorting and rejects unauthorized sort fields (9 ms)
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › searches links by full-text query using to_tsvector and plainto_tsquery
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    [0m [90m 86 |[39m       (item[33m:[39m any) [33m=>[39m item[33m.[39mid [33m===[39m link1[33m.[39mbody[33m.[39mid[33m,[39m
+     [90m 87 |[39m     )[33m;[39m
+    [31m[1m>[22m[39m[90m 88 |[39m     expect(foundMicro)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m    |[39m                        [31m[1m^[22m[39m
+     [90m 89 |[39m
+     [90m 90 |[39m     [90m// 2. Search for host 'analytics-dashboard.example.org'[39m
+     [90m 91 |[39m     [36mconst[39m resMetrics [33m=[39m [36mawait[39m request(app[33m.[39mgetHttpServer())[0m
+
+      at Object.<anonymous> (module-08.e2e-spec.ts:88:24)
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › filters search results by tag and supports combined query+tag filtering
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 2
+    Received length: 0
+    Received array:  []
+
+    [0m [90m 140 |[39m
+     [90m 141 |[39m     expect(resTag[33m.[39mbody[33m.[39mtotal)[33m.[39mtoBe([35m2[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 142 |[39m     expect(resTag[33m.[39mbody[33m.[39mitems)[33m.[39mtoHaveLength([35m2[39m)[33m;[39m
+     [90m     |[39m                               [31m[1m^[22m[39m
+     [90m 143 |[39m
+     [90m 144 |[39m     [90m// Combined filter by tag AND query[39m
+     [90m 145 |[39m     [36mconst[39m resCombined [33m=[39m [36mawait[39m request(app[33m.[39mgetHttpServer())[0m
+
+      at Object.<anonymous> (module-08.e2e-spec.ts:142:31)
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › handles pagination correctly with page and page_size metadata (regression test for off-by-one fix)
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "69af4380-5cf1-4b97-882b-c6d1302601ee"
+    Received: "ad841a1d-083b-4574-bfb4-b9dbb8c5201d"
+
+    [0m [90m 181 |[39m     expect(p1[33m.[39mbody[33m.[39mitems)[33m.[39mtoHaveLength([35m2[39m)[33m;[39m
+     [90m 182 |[39m     [90m// Page 1 starts with the first matching record (no records skipped at beginning)[39m
+    [31m[1m>[22m[39m[90m 183 |[39m     expect(p1[33m.[39mbody[33m.[39mitems[[35m0[39m][33m.[39mid)[33m.[39mtoBe(pageItemIds[[35m0[39m])[33m;[39m
+     [90m     |[39m                                 [31m[1m^[22m[39m
+     [90m 184 |[39m     expect(p1[33m.[39mbody[33m.[39mitems[[35m1[39m][33m.[39mid)[33m.[39mtoBe(pageItemIds[[35m1[39m])[33m;[39m
+     [90m 185 |[39m
+     [90m 186 |[39m     [90m// Page 2, page_size 2[39m[0m
+
+      at Object.<anonymous> (module-08.e2e-spec.ts:183:33)
+
+  ● Module 8 Full-Text Search & Pagination (e2e) › enforces owner-scoped search isolation across distinct principals
+
+    TypeError: Cannot read properties of undefined (reading 'id')
+
+    [0m [90m 294 |[39m       [33m.[39mexpect([35m200[39m)[33m;[39m
+     [90m 295 |[39m     expect(aliceSearch[33m.[39mbody[33m.[39mtotal)[33m.[39mtoBe([35m1[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 296 |[39m     expect(aliceSearch[33m.[39mbody[33m.[39mitems[[35m0[39m][33m.[39mid)[33m.[39mtoBe(aliceLink[33m.[39mbody[33m.[39mid)[33m;[39m
+     [90m     |[39m                                      [31m[1m^[22m[39m
+     [90m 297 |[39m
+     [90m 298 |[39m     [90m// Bob searches for the exact same host -> finds 0 (ownership isolation)[39m
+     [90m 299 |[39m     [36mconst[39m bobSearch [33m=[39m [36mawait[39m request(app[33m.[39mgetHttpServer())[0m
+
+      at Object.<anonymous> (module-08.e2e-spec.ts:296:38)
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 3 passed, 7 total
+Snapshots:   0 total
+Time:        9.41 s
+Ran all test suites matching test/module-08.e2e-spec.ts.

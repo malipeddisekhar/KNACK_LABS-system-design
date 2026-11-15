@@ -1,0 +1,25 @@
+MODULE 06 BREAK — Redis connection configuration failure
+Date: 2026-11-14
+Adaptive assignment: Easy — wrong Redis URL / connection configuration
+
+Fault injection (process-scoped; no project configuration changed):
+- Temporary API port: 3001
+- REDIS_URL override: redis://127.0.0.1:6380 (intentionally incorrect endpoint)
+- Existing redirect code: Kzucxn-I
+
+Observed reproduction:
+- API health: HTTP 200; NestJS application started.
+- Redis log: WARN [CacheService] Redis error: connect ECONNREFUSED 127.0.0.1:6380
+- Redis log: WARN [CacheService] Initial Redis connection failed: Connection is closed.
+- Redis log: WARN [CacheService] Cache get failed for code=Kzucxn-I: Connection is closed.
+- GET /r/Kzucxn-I: HTTP 302
+- Location: https://updated-mumbai.example.org/
+
+Result:
+The cache connection failed, but the redirect still succeeded with the destination from the database fallback. The public endpoint remained available.
+
+Cleanup:
+- Temporary API process was stopped after the request.
+- The bad REDIS_URL was not written to .env or other project configuration.
+- No application source files were changed.
+- One test click event was recorded for the existing short code.

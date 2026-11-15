@@ -1,0 +1,49 @@
+================================================================================
+Module 9 BUILD - Test 5: Click Analytics Retention Enforcement
+================================================================================
+Workspace: D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api
+Test File: test/module-09.e2e-spec.ts
+Target Database: url_shortener_test (dedicated isolated test database)
+Original Database: url_shortener (untouched)
+
+COMMAND:
+node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json module-09.e2e-spec.ts --runInBand
+
+DATABASE SAFETY VERIFICATION:
+- Jest setupFiles loaded: D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\test\setup-test-db.ts
+- PrismaService active database connection verified via SELECT current_database(): url_shortener_test
+- Dual-layer safety guard verified
+
+TEST OUTPUT:
+PASS test/module-09.e2e-spec.ts
+  Module 9 E2E Test Suite (e2e)
+    1. Authenticated link creation
+      √ creates a link via POST /links when authenticated and returns HTTP 201 with destination URL (77 ms)
+    2. URL redirect
+      √ redirects GET /r/:code to the destination URL with HTTP 302 and exact Location header (924 ms)
+    3. Protected-route authentication
+      √ rejects unauthenticated GET /links with HTTP 401 and returns no protected data (10 ms)
+    4. Owner scoping (IDOR prevention)
+      √ returns HTTP 404 when Bob attempts to access Alice's link via GET /links/:id (31 ms)
+    5. Click analytics retention enforcement
+      √ enforces retention by purging expired click events and excluding them from analytics queries (241 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        3.854 s
+Ran all test suites matching module-09.e2e-spec.ts.
+
+ASSERTIONS VERIFIED:
+1. Authenticated as Alice and created test link in url_shortener_test.
+2. Deterministically seeded two click events:
+   - Expired event: clickedAt = 45 days ago (> 30-day retention window).
+   - Recent event: clickedAt = 2 hours ago.
+3. Pre-purge verification: GET /links/:id/analytics returned total_clicks = 2.
+4. Invoked existing retention purge mechanism: analyticsService.purgeExpiredEvents(30).
+5. Post-purge verification: GET /links/:id/analytics returned total_clicks = 1.
+6. Verified expired click event was permanently purged from database and excluded from API responses.
+7. Verified recent event was preserved in both database and API response.
+8. Deterministic cleanup executed in afterAll:
+   - url_shortener_test counts: { links: '0', clicks: '0' }
+   - url_shortener (dev) counts: { links: '13', clicks: '255' } (untouched)

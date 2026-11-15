@@ -1,0 +1,12 @@
+Commands used:
+GET /links without Authorization header
+POST /auth/login with an existing development user
+GET /links with Authorization: Bearer <redacted>
+Endpoint tested: GET /links
+HTTP status without token: 401
+HTTP status with valid JWT: 200
+Authenticated principal: principal-alice
+Returned link records: 1
+Records owned by authenticated principal: 1
+Token handling: JWT obtained and used in memory; token redacted from output.
+Test result: PASS

@@ -1,0 +1,41 @@
+# Dependencies and build outputs
+node_modules
+dist
+
+# Environment variables and secrets
+.env
+.env.*
+*.env
+*.local
+
+# Tests and coverage
+test
+tests
+coverage
+src/**/*.spec.ts
+src/**/*.test.ts
+jest*.json
+
+# Version control and editor
+.git
+.gitignore
+.vscode
+.idea
+
+# Tooling and linters
+.oxlintrc.json
+eslint*
+prettier*
+
+# Logs and scratch
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+scratch
+progress
+
+# Documentation and OS files
+README.md
+.DS_Store
+Thumbs.db

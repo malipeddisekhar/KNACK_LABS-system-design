@@ -1,0 +1,6 @@
+Command: npm run lint
+
+> api@0.0.1 lint
+> oxlint --type-aware src/ test/
+
+Exit code: 0

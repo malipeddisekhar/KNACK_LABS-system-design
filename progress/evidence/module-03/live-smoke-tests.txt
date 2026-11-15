@@ -1,0 +1,9 @@
+link creation: HTTP 201 true
+paginated listing: HTTP 200 true
+ID lookup: HTTP 200 true
+redirect: HTTP 302 true
+unsafe URL rejected: HTTP 400
+invalid expiration rejected: HTTP 400
+invalid tags rejected: HTTP 400
+health: HTTP 200 true
+live test record cleanup: complete

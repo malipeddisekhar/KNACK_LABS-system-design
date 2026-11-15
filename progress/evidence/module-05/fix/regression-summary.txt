@@ -1,0 +1,133 @@
+================================================================================
+MODULE 05 FIX EVIDENCE: ROOT CAUSE & REGRESSION VERIFICATION REPORT
+================================================================================
+Date: 2026-11-13
+Module: 05 - Error Handling & Logging
+Step: FIX
+Topic: Swallowed Database Exception during Write
+
+1. ROOT CAUSE EXPLANATION
+--------------------------------------------------------------------------------
+In `api/src/links/links.service.ts`, inside the `create()` method:
+A `try/catch` block wraps the database insertion `await this.prisma.link.create(...)`.
+During BREAK, an improper fallback was introduced into the `catch (error)` block:
+instead of re-throwing unexpected database errors with `throw error;`, the catch
+block swallowed the exception and returned a fabricated link object:
+`{ id: '00000000-0000-0000-0000-000000000000', code, ... }`.
+
+Because NestJS methods returning values resolve with HTTP 201 Created by default,
+this silent suppression caused:
+1. False-Positive Success: The client received HTTP 201 Created and assumed the
+   link was stored durably.
+2. Silent Data Loss: No record was ever written to PostgreSQL.
+3. Downstream 404s: Calling `GET /links/:id` with the returned dummy ID immediately
+   returned HTTP 404 Not Found.
+4. Broken Observability: Because the exception was swallowed in the service layer,
+   it never reached `HttpExceptionFilter`, so no structured 500 error log was emitted.
+
+2. CODE CORRECTION IMPLEMENTED
+--------------------------------------------------------------------------------
+File: `api/src/links/links.service.ts`
+
+Lines 85-97:
+```typescript
+      } catch (error) {
+        if (this.isPrismaError(error, 'P2002')) {
+          if (attempt < CODE_GENERATION_ATTEMPTS - 1) {
+            continue;
+          }
+
+          throw new ServiceUnavailableException(
+            'Unable to allocate a short code right now.',
+          );
+        }
+
+        throw error;
+      }
+```
+
+Key Fix Properties:
+1. Removed the fake fallback object completely.
+2. Preserved the duplicate-code retry loop for Prisma error `P2002` (up to 3 attempts).
+3. Preserved `ServiceUnavailableException` (HTTP 503) when retry attempts are exhausted.
+4. Restored `throw error;` for any unexpected database failures.
+5. The propagated error bubbles up to `HttpExceptionFilter`, which:
+   - Maps unexpected errors to `HttpStatus.INTERNAL_SERVER_ERROR` (500).
+   - Generates a safe error envelope `{ error: { code: 'INTERNAL_SERVER_ERROR', message: '...', request_id: '...' } }`.
+   - Populates `request_id` matching the `X-Request-ID` response header.
+   - Logs structured JSON with latency, route, status code, and request ID.
+   - Redacts internal stack traces and database credentials from the client response.
+
+3. BEFORE-AND-AFTER BEHAVIOR COMPARISON
+--------------------------------------------------------------------------------
+Scenario: Database write failure during POST /links
+
+BEFORE (BREAK state):
+- HTTP Status: 201 Created
+- Response Body:
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "code": "e7hZsiy0",
+    "short_url": "http://localhost:3000/r/e7hZsiy0",
+    "long_url": "https://example.com/break-test",
+    "created_at": "..."
+  }
+- Subsequent GET /links/:id: 404 Not Found
+- Server Error Logs: None (exception swallowed)
+
+AFTER (FIX state):
+- HTTP Status: 500 Internal Server Error
+- Response Body:
+  {
+    "error": {
+      "code": "INTERNAL_SERVER_ERROR",
+      "message": "An unexpected error occurred. Please try again later.",
+      "request_id": "<uuid>"
+    }
+  }
+- Headers: `X-Request-ID: <uuid>` (matches envelope `request_id`)
+- Server Error Logs:
+  [Nest] ERROR [HTTP] {"request_id":"<uuid>","method":"POST","route":"/links","status_code":500,"error_code":"INTERNAL_SERVER_ERROR","message":"..."}
+- Secret / Stack Trace: Neither stack trace nor database connection string is exposed.
+
+4. REGRESSION TEST RESULTS
+--------------------------------------------------------------------------------
+1. Build (`npm run build`):
+   Result: Exit code 0 (clean compilation).
+
+2. Lint (`npm run lint` via oxlint):
+   Result: 0 warnings, 0 errors across 46 files.
+
+3. Unit Tests (`npm test`):
+   - app.controller.spec.ts: PASSED (1/1)
+   - app.module.spec.ts: PASSED (3/3)
+   Total: 2 suites passed, 4 tests passed.
+
+4. E2E Test Suite (`npm run test:e2e`):
+   - test/app.e2e-spec.ts: PASSED (1/1)
+   - test/module-03.e2e-spec.ts: PASSED (18/18)
+   - test/module-04.e2e-spec.ts: PASSED (3/3)
+   - test/module-05.e2e-spec.ts: PASSED (13/13)
+     * Unique X-Request-ID attached
+     * 400 validation error envelope verification
+     * 401 unauthorized envelope verification
+     * 404 not found envelope verification
+     * request_id matching X-Request-ID header
+     * Health and login success responses unchanged
+     * Sentinel secret not exposed in 401 body
+     * Expired JWT envelope verification
+     * Valid link creation returns HTTP 201 with genuine link ID
+     * Database write failure returns HTTP 500 envelope and logs securely
+     * P2002 duplicate short code retry succeeds on second attempt
+     * P2002 retry exhaustion returns HTTP 503 envelope
+   Total: 4 suites passed, 35 tests passed.
+
+5. VERIFICATION EVIDENCE FILES
+--------------------------------------------------------------------------------
+- progress/evidence/module-05/fix/build.txt
+- progress/evidence/module-05/fix/lint.txt
+- progress/evidence/module-05/fix/unit-tests.txt
+- progress/evidence/module-05/fix/e2e-tests.txt
+- progress/evidence/module-05/fix/regression-summary.txt
+Original BREAK evidence in progress/evidence/module-05/break/ remains preserved.
+

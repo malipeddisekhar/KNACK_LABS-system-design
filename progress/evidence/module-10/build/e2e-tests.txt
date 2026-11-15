@@ -1,0 +1,15 @@
+=== Full Regression: All 9 E2E Test Suites Against url_shortener_test ===
+PASS test/module-08.e2e-spec.ts
+PASS test/module-06.e2e-spec.ts
+PASS test/module-04.e2e-spec.ts
+PASS test/module-07.e2e-spec.ts
+PASS test/module-05.e2e-spec.ts
+PASS test/module-03.e2e-spec.ts
+PASS test/module-09.e2e-spec.ts
+PASS test/module-10.e2e-spec.ts
+PASS test/app.e2e-spec.ts
+
+Test Suites: 9 passed, 9 total
+Tests:       69 passed, 69 total
+Snapshots:   0 total
+Database:    url_shortener_test (strictly verified in setup-test-db.ts and test hooks)

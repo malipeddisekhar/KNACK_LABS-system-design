@@ -1,0 +1,27 @@
+﻿================================================================================
+UPSK MODULE 8 - REFLECT: SEARCH SORT-BY INJECTION ATTEMPT DEMO
+================================================================================
+Timestamp: 2026-11-14T20:11:14Z
+Request: GET http://localhost:3000/links/search?sort_by=created_at%20OR%201%3D1
+Headers: Authorization: Bearer <REDACTED_JWT_TOKEN>
+
+--- RAW HTTP RESPONSE ---
+HTTP/1.1 400 Bad Request
+X-Powered-By: Express
+X-Request-ID: 3ca11684-aaae-4ac2-8996-b212872b9824
+Content-Type: application/json; charset=utf-8
+Content-Length: 168
+ETag: W/"a8-/wPH3QeBcgugzGX+7RO8P70qeXs"
+Date: Sat, 14 Nov 2026 14:41:14 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":{"code":"BAD_REQUEST","message":"sort_by must be one of the following values: created_at, long_url, code","request_id":"3ca11684-aaae-4ac2-8996-b212872b9824"}}
+
+--- VERIFICATION FINDINGS ---
+- HTTP Status: 400 Bad Request
+- Error Code: BAD_REQUEST
+- Message: sort_by must be one of the following values: created_at, long_url, code
+- Allowlist Validation: The malicious sort field 'created_at OR 1=1' was rejected by DTO validation (@IsIn(['created_at', 'long_url', 'code'])) before reaching the SQL query builder.
+- SQL Injection Prevention: Successfully blocked dynamic SQL manipulation.
+================================================================================

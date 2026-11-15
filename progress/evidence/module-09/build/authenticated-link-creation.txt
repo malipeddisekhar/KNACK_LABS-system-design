@@ -1,0 +1,39 @@
+================================================================================
+Module 9 BUILD - Test 1: Authenticated Link Creation
+================================================================================
+Workspace: D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api
+Test File: test/module-09.e2e-spec.ts
+Target Database: url_shortener_test (dedicated isolated test database)
+Original Database: url_shortener (untouched)
+
+COMMAND:
+node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json module-09.e2e-spec.ts --runInBand
+
+DATABASE SAFETY VERIFICATION:
+- Jest setupFiles loaded: D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api\test\setup-test-db.ts
+- PrismaService active database connection verified via SELECT current_database(): url_shortener_test
+- Fallback to development DATABASE_URL strictly prevented by dual-layer safety guard
+
+TEST OUTPUT:
+PASS test/module-09.e2e-spec.ts (10.065 s)
+  Module 9 E2E Test Suite (e2e)
+    1. Authenticated link creation
+      √ creates a link via POST /links when authenticated and returns HTTP 201 with destination URL (98 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        11.355 s
+Ran all test suites matching module-09.e2e-spec.ts.
+
+ASSERTIONS VERIFIED:
+1. Valid JWT authentication via POST /auth/login for test user 'alice'.
+2. Authenticated POST /links request with Bearer token.
+3. HTTP Status 201 (Created).
+4. Response contains id, code, short_url, created_at.
+5. Response long_url exactly matches original destination URL:
+   'https://example.com/module-09/build/authenticated-link'
+6. Database persistence verified in url_shortener_test with principalId 'principal-alice'.
+7. Deterministic cleanup executed in afterAll:
+   - url_shortener_test counts after cleanup: { links: '0', clicks: '0' }
+   - url_shortener (dev) counts remained untouched: { links: '13', clicks: '255' }

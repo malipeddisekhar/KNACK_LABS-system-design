@@ -1,0 +1,27 @@
+
+> api@0.0.1 test
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js
+
+PASS src/links/pagination-boundary.spec.ts
+(node:20800) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/app.controller.spec.ts
+[31m[Nest] 17488  - [39m14/11/2026, 7:58:45 pm [31m  ERROR[39m [38;5;3m[AnalyticsWorker] [39m[31m[AnalyticsWorker] Failed to persist click event (eventId=retry-evt-id): Database connection lost[39m
+(node:17488) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/analytics/analytics.service.spec.ts
+[32m[Nest] 17488  - [39m14/11/2026, 7:58:45 pm [32m    LOG[39m [38;5;3m[AnalyticsService] [39m[32m[Analytics] Enqueued click job: eventId=06b6811a-08c2-44c0-ba03-d2445b00e225 linkId=test-link-uuid[39m
+[33m[Nest] 17488  - [39m14/11/2026, 7:58:45 pm [33m   WARN[39m [38;5;3m[AnalyticsService] [39m[33m[Analytics] Queue unavailable (Redis connection refused). Applying durable fallback to database.[39m
+[32m[Nest] 17488  - [39m14/11/2026, 7:58:45 pm [32m    LOG[39m [38;5;3m[AnalyticsService] [39m[32m[Analytics] Durable fallback saved click event: eventId=71209f61-bda4-4ef8-8c15-ed02cd41005e[39m
+[32m[Nest] 17488  - [39m14/11/2026, 7:58:45 pm [32m    LOG[39m [38;5;3m[AnalyticsWorker] [39m[32m[AnalyticsWorker] Persisted click event: eventId=evt-uuid-1 linkId=link-uuid-1[39m
+[33m[Nest] 17488  - [39m14/11/2026, 7:58:45 pm [33m   WARN[39m [38;5;3m[AnalyticsWorker] [39m[33m[AnalyticsWorker] Duplicate eventId ignored (idempotent): eventId=duplicate-evt-id[39m
+(node:18784) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/app.module.spec.ts
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+
+Test Suites: 4 passed, 4 total
+Tests:       16 passed, 16 total
+Snapshots:   0 total
+Time:        3.385 s
+Ran all test suites.

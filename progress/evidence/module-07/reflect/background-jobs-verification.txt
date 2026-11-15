@@ -1,0 +1,158 @@
+﻿================================================================
+UPSK SYSTEM DESIGN - MODULE 7 REFLECT MINI PRACTICAL TASK
+Background Jobs & Analytics Verification (npm run test:e2e)
+Timestamp: 2026-11-14T11:42:13.3584218+05:30
+Working Directory: D:\KNACK SEKHAR LAB\upsk-system-design-workspace\api
+Command: npm run test:e2e
+================================================================
+
+> api@0.0.1 test:e2e
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json
+
+(node:18396) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5372) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11156) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17792) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:31204) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2140) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[31m[Nest] 11156  - [39m14/11/2026, 11:42:16 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"c313311f-0096-4afb-bc71-30e7b93138a2","method":"POST","route":"/links","status_code":400,"error_code":"BAD_REQUEST","message":"long_url must be an absolute HTTP or HTTPS URL without control characters, backslashes, or credentials."}[39m
+[31m[Nest] 11156  - [39m14/11/2026, 11:42:16 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"58d022ea-7d0d-4ebc-9ed7-2e65ebcd8258","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"Invalid or expired token."}[39m
+[31m[Nest] 11156  - [39m14/11/2026, 11:42:16 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"55c09b4f-5dcf-4a84-bb5f-05830d0139d8","method":"GET","route":"/nonexistent-route","status_code":404,"error_code":"NOT_FOUND","message":"Cannot GET /nonexistent-route"}[39m
+[31m[Nest] 11156  - [39m14/11/2026, 11:42:16 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"3f76b216-c4e0-4d5a-9cf4-9ff995893919","method":"GET","route":"/nonexistent-route","status_code":404,"error_code":"NOT_FOUND","message":"Cannot GET /nonexistent-route"}[39m
+[31m[Nest] 11156  - [39m14/11/2026, 11:42:16 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"581b79c4-aed4-4383-93b9-66bb6af51986","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"Invalid or expired token."}[39m
+[31m[Nest] 11156  - [39m14/11/2026, 11:42:16 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"60ac7b0a-5a77-45bf-b756-69114a01447b","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"Invalid or expired token."}[39m
+[31m[Nest] 11156  - [39m14/11/2026, 11:42:16 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"b9e65fd7-7eda-42de-a819-83fe3c668531","method":"POST","route":"/links","status_code":500,"error_code":"INTERNAL_SERVER_ERROR","message":"Database connection unexpectedly closed during write"}[39m
+[31m[Nest] 11156  - [39m14/11/2026, 11:42:16 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"eebca8ab-b63c-482d-bfaa-2c28af7dba28","method":"POST","route":"/links","status_code":503,"error_code":"SERVICE_UNAVAILABLE","message":"Unable to allocate a short code right now."}[39m
+PASS test/module-05.e2e-spec.ts
+  ● Console
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+PASS test/app.e2e-spec.ts
+  ● Console
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+PASS test/module-03.e2e-spec.ts
+  ● Console
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+PASS test/module-04.e2e-spec.ts
+  ● Console
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+PASS test/module-07.e2e-spec.ts
+  ● Console
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+[31m[Nest] 2140  - [39m14/11/2026, 11:42:19 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"9ce48d07-1e80-41b3-a783-6bc94c1c9529","method":"GET","route":"/r/wR8IJ4ey","status_code":404,"error_code":"NOT_FOUND","message":"Short link not found."}[39m
+PASS test/module-06.e2e-spec.ts
+  ● Console
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+System.Management.Automation.RemoteException
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+System.Management.Automation.RemoteException
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+System.Management.Automation.RemoteException
+Test Suites: 6 passed, 6 total
+Tests:       48 passed, 48 total
+Snapshots:   0 total
+Time:        5.968 s, estimated 6 s
+Ran all test suites.
+================================================================
+EXECUTION SUMMARY:
+Exit Code: 0
+Module 7 E2E Status: PASSED
+================================================================

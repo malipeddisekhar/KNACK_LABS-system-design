@@ -1,0 +1,115 @@
+================================================================
+UPSK SYSTEM DESIGN - MODULE 7 IDEMPOTENCY SCHEMA VERIFICATION
+Database-Enforced Idempotency & Migration Audit
+Timestamp: 2026-11-14T05:54:48.000Z
+================================================================
+
+--- 1. PRISMA SCHEMA FIELD DEFINITION ---
+File: api/prisma/schema.prisma
+Model: ClickEvent
+
+model ClickEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  eventId   String   @unique @default(uuid()) @map("event_id")
+  linkId    String   @map("link_id") @db.Uuid
+  clickedAt DateTime @default(now()) @map("clicked_at") @db.Timestamptz(6)
+  userAgent String   @map("user_agent") @db.Text
+  referrer  String   @db.Text
+  ipHash    String   @map("ip_hash") @db.Text
+  link      Link     @relation(fields: [linkId], references: [id])
+
+  @@index([linkId, clickedAt])
+  @@map("click_events")
+}
+
+
+--- 2. MIGRATION NAME & SQL DEFINITION ---
+Migration Name: 20261114060000_module7_click_event_idempotency
+File: api/prisma/migrations/20261114060000_module7_click_event_idempotency/migration.sql
+
+-- Step 1: Add the column as nullable so existing records are unaffected
+ALTER TABLE "click_events" ADD COLUMN "event_id" TEXT;
+
+-- Step 2: Backfill unique UUIDs for all existing click event records
+UPDATE "click_events" SET "event_id" = gen_random_uuid()::TEXT WHERE "event_id" IS NULL;
+
+-- Step 3: Enforce NOT NULL on event_id now that every row has a unique value
+ALTER TABLE "click_events" ALTER COLUMN "event_id" SET NOT NULL;
+
+-- Step 4: Add the UNIQUE constraint/index for database-enforced idempotency
+CREATE UNIQUE INDEX "click_events_event_id_key" ON "click_events"("event_id");
+
+
+--- 3. PRISMA MIGRATE STATUS ---
+Command: npx prisma migrate status
+
+Loaded Prisma config from prisma7.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": PostgreSQL database "url_shortener", schema "public" at "localhost:5432"
+
+3 migrations found in prisma/migrations
+
+Database schema is up to date!
+
+
+--- 4. POSTGRESQL NOT NULL & UNIQUE INDEX VERIFICATION ---
+Query: SELECT column_name, data_type, is_nullable, column_default 
+       FROM information_schema.columns 
+       WHERE table_name = 'click_events' AND column_name = 'event_id';
+
+Result:
+[
+  {
+    column_name: 'event_id',
+    data_type: 'text',
+    is_nullable: 'NO',
+    column_default: null
+  }
+]
+
+Query: SELECT indexname, indexdef 
+       FROM pg_indexes 
+       WHERE tablename = 'click_events' AND indexname = 'click_events_event_id_key';
+
+Result:
+[
+  {
+    indexname: 'click_events_event_id_key',
+    indexdef: 'CREATE UNIQUE INDEX click_events_event_id_key ON public.click_events USING btree (event_id)'
+  }
+]
+
+Migration History (_prisma_migrations):
+  [1] 20261108063350_init                         | Finished: 2026-11-08T12:03:50.202Z | Steps: 1
+  [2] 20261112120000_module4_principal_ownership  | Finished: 2026-11-12T20:53:32.884Z | Steps: 1
+  [3] 20261114060000_module7_click_event_idempotency | Finished: 2026-11-14T10:56:46.037Z | Steps: 1
+
+
+--- 5. DUPLICATE EVENT ID REJECTION TEST (PRISMA ERROR P2002) ---
+Test: Insert two records with the identical eventId: idempotency-check-db3e6c5a-2015-4b2a-829a-523b7f6c7410
+
+Initial Click Event:
+  Inserted ID: 1eb83db2-398d-4b36-8425-38e4a0c4888e
+  Status: SUCCESS
+
+Duplicate Click Event:
+  Caught Error Code: P2002
+  Error Name: PrismaClientKnownRequestError
+  Constraint: click_events_event_id_key
+  PostgreSQL Code: 23505 (unique_violation)
+  Target: {"driverAdapterError":{"name":"DriverAdapterError","cause":{"originalCode":"23505","originalMessage":"duplicate key value violates unique constraint \"click_events_event_id_key\"","kind":"UniqueConstraintViolation","constraint":{"index":"click_events_event_id_key"},"table":"click_events"}},"modelName":"ClickEvent"}
+
+Status: Duplicate rejected with Prisma error P2002 (CONFIRMED)
+
+
+--- 6. EXISTING RECORDS PRESERVATION CHECK ---
+Total click_events records:     255
+Records with NULL event_id:     0
+Duplicate event_id values:      0
+All existing records preserved: YES (255 of 255 records intact with distinct UUIDs)
+
+
+================================================================
+VERIFICATION RESULT: ALL IDEMPOTENCY REQUIREMENTS VERIFIED
+================================================================

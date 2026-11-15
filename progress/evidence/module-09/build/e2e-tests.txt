@@ -1,0 +1,20 @@
+PASS test/module-09.e2e-spec.ts
+  Module 9 E2E Test Suite (e2e)
+    1. Authenticated link creation
+      √ creates a link via POST /links when authenticated and returns HTTP 201 with destination URL (92 ms)
+    2. URL redirect
+      √ redirects GET /r/:code to the destination URL with HTTP 302 and exact Location header (803 ms)
+    3. Protected-route authentication
+      √ rejects unauthenticated GET /links with HTTP 401 and returns no protected data (7 ms)
+    4. Owner scoping (IDOR prevention)
+      √ returns HTTP 404 when Bob attempts to access Alice's link via GET /links/:id (19 ms)
+    5. Click analytics retention enforcement
+      √ enforces retention by purging expired click events and excluding them from analytics queries (58 ms)
+    6. URL validation
+      √ rejects documented bypass string http%3A%2F%2Fevil.example.com with HTTP 400 without storing it (5 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        3.532 s
+Ran all test suites matching module-09.e2e-spec.ts.

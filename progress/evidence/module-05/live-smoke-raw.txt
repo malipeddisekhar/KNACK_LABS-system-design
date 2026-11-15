@@ -1,0 +1,38 @@
+﻿=== 404 raw ===
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+X-Request-ID: 5ee4a2e0-51fb-4510-a677-5b402fd42e67
+Content-Type: application/json; charset=utf-8
+Content-Length: 118
+ETag: W/"76-40X09we9Oh9IbuEOTTV4leJFZQc"
+Date: Thu, 12 Nov 2026 17:26:28 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":{"code":"NOT_FOUND","message":"Cannot GET /nonexistent","request_id":"5ee4a2e0-51fb-4510-a677-5b402fd42e67"}}
+
+=== 401 raw ===
+HTTP/1.1 401 Unauthorized
+X-Powered-By: Express
+X-Request-ID: 8259dcb6-ee39-4c01-ad94-055c267b2a42
+Content-Type: application/json; charset=utf-8
+Content-Length: 123
+ETag: W/"7b-qWYgT6do63yjN8cj0zyM7SCGkm8"
+Date: Thu, 12 Nov 2026 17:26:28 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":{"code":"UNAUTHORIZED","message":"Bearer token is required.","request_id":"8259dcb6-ee39-4c01-ad94-055c267b2a42"}}
+
+=== 200 health ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+X-Request-ID: 59901dc1-18ce-40a4-9451-fd9d3bb01a8b
+Content-Type: application/json; charset=utf-8
+Content-Length: 11
+ETag: W/"b-Ai2R8hgEarLmHKwesT1qcY913ys"
+Date: Thu, 12 Nov 2026 17:26:28 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"ok":true}

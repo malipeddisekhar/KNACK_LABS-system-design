@@ -1,0 +1,68 @@
+# ==============================================================================
+# Git Ignore Configuration for URL Shortener Workspace
+# ==============================================================================
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build artifacts and compilation outputs
+/dist/
+*/dist/
+/build/
+api/build/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+*/coverage/
+
+# Preserve progress and evidence folders
+!progress/
+!progress/**
+
+# Environment files and secrets
+.env
+.env.*
+*.env
+*.local
+# Explicitly preserve .env.example templates
+!.env.example
+!*/.env.example
+
+# Credentials, tokens, and private keys
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+*credentials*.json
+*token*.json
+*id_rsa*
+*id_ed25519*
+
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Logs and debug outputs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Scratch and temporary directories
+scratch/
+*/scratch/
+tmp/
+temp/

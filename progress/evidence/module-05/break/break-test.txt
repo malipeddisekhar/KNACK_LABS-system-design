@@ -1,0 +1,77 @@
+﻿node : (node:19880) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+At line:1 char:181
++ ... space\api"; node --experimental-vm-modules ./node_modules/jest/bin/je ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:19880) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+  console.log
+    --- BREAK REPRODUCTION OUTPUT ---
+
+      at Object.<anonymous> (module-05-break.e2e-spec.ts:64:13)
+
+  console.log
+    POST /links Status Code: 201
+
+      at Object.<anonymous> (module-05-break.e2e-spec.ts:65:13)
+
+  console.log
+    POST /links Response Body: {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "code": "e7hZsiy0",
+      "short_url": "http://localhost:3000/r/e7hZsiy0",
+      "long_url": "https://example.com/break-test",
+      "created_at": "2026-11-13T06:17:25.230Z"
+    }
+
+      at Object.<anonymous> (module-05-break.e2e-spec.ts:66:13)
+
+[31m[Nest] 19880  - [39m13/11/2026, 11:47:25 am [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"d7abfe59-e
+0ed-46e5-afd9-ae793072c0ee","method":"GET","route":"/links/00000000-0000-0000-0000-000000000000","status_code":404,"err
+or_code":"NOT_FOUND","message":"Link not found."}[39m
+  console.log
+    GET /links/:id Status Code: 404
+
+      at Object.<anonymous> (module-05-break.e2e-spec.ts:81:13)
+
+  console.log
+    GET /links/:id Response Body: {
+      "error": {
+        "code": "NOT_FOUND",
+        "message": "Link not found.",
+        "request_id": "d7abfe59-e0ed-46e5-afd9-ae793072c0ee"
+      }
+    }
+
+      at Object.<anonymous> (module-05-break.e2e-spec.ts:82:13)
+
+FAIL test/module-05-break.e2e-spec.ts
+  Module 05 BREAK — Swallowed Exception during Database Write
+    √ demonstrates the swallowed exception: write failure returns HTTP 201 instead of 500 (127 ms)
+    × proves the assertion failure when expecting correct 500 error envelope behavior (6 ms)
+
+  ● Module 05 BREAK — Swallowed Exception during Database Write › proves the assertion failure when expecting correct 
+500 error envelope behavior
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 500
+    Received: 201
+
+    [0m [90m  98 |[39m
+     [90m  99 |[39m     [90m// This assertion FAILS because the status is 201, not 500:[39m
+    [31m[1m>[22m[39m[90m 100 |[39m     
+expect(createRes[33m.[39mstatus)[33m.[39mtoBe([35m500[39m)[33m;[39m
+     [90m     |[39m                              [31m[1m^[22m[39m
+     [90m 101 |[39m   })[33m;[39m
+     [90m 102 |[39m })[33m;[39m
+     [90m 103 |[39m[0m
+
+      at Object.<anonymous> (module-05-break.e2e-spec.ts:100:30)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        2.512 s, estimated 14 s
+Ran all test suites matching test/module-05-break.e2e-spec.ts.

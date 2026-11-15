@@ -1,0 +1,38 @@
+=== Module 06: Live Redis Caching & Invalidation Verification (AWS ap-south-1) ===
+
+Starting API server on port 3000...
+
+1. Logging in as alice...
+Login status: 201 (token obtained)
+
+2. Creating a new short link...
+Created Link ID: 1b3e0d6a-07ed-4bbe-ae8a-1e2ced3a847c
+Short Code: Kzucxn-I
+Initial Target: https://initial-mumbai.example.org/
+
+3. First redirect request (Cache Miss -> DB hit + cache set)...
+First redirect status: 302
+Location header: https://initial-mumbai.example.org/
+
+4. Second redirect request (Cache Hit)...
+Second redirect status: 302
+Location header: https://initial-mumbai.example.org/
+
+5. Updating short link target via PATCH...
+PATCH status: 200
+Updated long_url in DB: https://updated-mumbai.example.org/
+
+6. Third redirect request (After cache invalidation)...
+Third redirect status: 302
+Location header: https://updated-mumbai.example.org/
+
+Stopping server to run Redis-down fallback drill...
+
+7. Redis Down Drill: Starting server with broken REDIS_URL...
+
+8. Fourth redirect request with Redis down (Graceful DB fallback)...
+Redis-down redirect status: 302
+Location header: https://updated-mumbai.example.org/
+Result: Redirect succeeded via database fallback without hanging or crashing!
+
+=== All Module 06 Caching Verification Steps Completed Successfully ===

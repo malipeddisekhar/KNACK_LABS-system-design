@@ -1,0 +1,175 @@
+
+> api@0.0.1 test:e2e
+> node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json
+
+(node:20268) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:27204) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7824) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:31196) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:21060) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24420) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:4148) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS test/app.e2e-spec.ts (11.505 s)
+  ● Console
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+[31m[Nest] 31196  - [39m14/11/2026, 7:57:58 pm [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"35d961be-2313-416c-bd1d-5e73a2dfb329","method":"POST","route":"/links","status_code":400,"error_code":"BAD_REQUEST","message":"long_url must be an absolute HTTP or HTTPS URL without control characters, backslashes, or credentials."}[39m
+[31m[Nest] 31196  - [39m14/11/2026, 7:57:58 pm [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"94ce797f-ac29-4b7b-85aa-327a54eee7e0","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"Invalid or expired token."}[39m
+[31m[Nest] 31196  - [39m14/11/2026, 7:57:58 pm [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"0426aeec-57df-4665-9d4c-adbaa7a40f2e","method":"GET","route":"/nonexistent-route","status_code":404,"error_code":"NOT_FOUND","message":"Cannot GET /nonexistent-route"}[39m
+[31m[Nest] 31196  - [39m14/11/2026, 7:57:58 pm [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"96bf62fc-4fcd-4dc7-a775-390d480d2d07","method":"GET","route":"/nonexistent-route","status_code":404,"error_code":"NOT_FOUND","message":"Cannot GET /nonexistent-route"}[39m
+[31m[Nest] 31196  - [39m14/11/2026, 7:57:58 pm [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"073ec5e1-d8d7-44dc-8869-d6366ddc2a4c","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"Invalid or expired token."}[39m
+[31m[Nest] 31196  - [39m14/11/2026, 7:57:58 pm [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"e442abd8-2450-4f73-9d3f-5a2446cc777a","method":"GET","route":"/links","status_code":401,"error_code":"UNAUTHORIZED","message":"Invalid or expired token."}[39m
+[31m[Nest] 31196  - [39m14/11/2026, 7:57:59 pm [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"fbd202f3-666a-4486-bdaf-071dd9e05c8e","method":"POST","route":"/links","status_code":500,"error_code":"INTERNAL_SERVER_ERROR","message":"Database connection unexpectedly closed during write"}[39m
+[31m[Nest] 31196  - [39m14/11/2026, 7:57:59 pm [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"4e03a7c6-7b89-48d4-b964-b34bec9d884e","method":"POST","route":"/links","status_code":503,"error_code":"SERVICE_UNAVAILABLE","message":"Unable to allocate a short code right now."}[39m
+PASS test/module-05.e2e-spec.ts (13.485 s)
+  ● Console
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+PASS test/module-04.e2e-spec.ts (13.611 s)
+  ● Console
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+PASS test/module-03.e2e-spec.ts (14.091 s)
+  ● Console
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+PASS test/module-08.e2e-spec.ts (14.109 s)
+  ● Console
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+PASS test/module-07.e2e-spec.ts (14.691 s)
+  ● Console
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+[31m[Nest] 21060  - [39m14/11/2026, 7:58:02 pm [31m  ERROR[39m [38;5;3m[HTTP] [39m[31m{"request_id":"8dc59bf9-25a7-4e8a-9b61-e582162a1a39","method":"GET","route":"/r/hgQnE2Mf","status_code":404,"error_code":"NOT_FOUND","message":"Short link not found."}[39m
+PASS test/module-06.e2e-spec.ts (16.124 s)
+  ● Console
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+    console.warn
+      IMPORTANT! Eviction policy is optimistic-volatile. It should be "noeviction"
+
+      at RedisConnection.getRedisVersionAndType (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:597:29)
+      at RedisConnection.init (../node_modules/bullmq/dist/cjs/classes/redis-connection.js:278:35)
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+
+Test Suites: 7 passed, 7 total
+Tests:       55 passed, 55 total
+Snapshots:   0 total
+Time:        17.594 s
+Ran all test suites.

@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-and-build:
+    name: Test and Build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: url_shortener_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d url_shortener_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    defaults:
+      run:
+        working-directory: api
+
+    env:
+      NODE_ENV: test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/url_shortener_test?schema=public
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-testing-jwt-secret-minimum-32-characters-entropy
+      PORT: 3000
+      PUBLIC_BASE_URL: http://localhost:3000
+      RETENTION_DAYS: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies (clean install)
+        run: npm ci
+
+      - name: Generate Prisma 7 Client
+        run: npx prisma generate
+
+      - name: Apply Prisma migrations to isolated test database
+        run: npx prisma migrate deploy --config prisma7.test.config.ts
+
+      - name: Run linter (oxlint)
+        run: npm run lint
+
+      - name: Compile NestJS application (production build)
+        run: npm run build
+
+      - name: Run unit test suite
+        run: npm test -- --forceExit
+
+      - name: Run full end-to-end test suite (in-band)
+        run: npm run test:e2e -- --runInBand --forceExit

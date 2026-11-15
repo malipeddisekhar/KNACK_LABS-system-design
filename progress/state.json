@@ -1,0 +1,108 @@
+{
+  "bootcamp": {
+    "pretest": {
+      "self_rating": "ok — can debug with logs and documentation",
+      "setup_check": {
+        "os": "Windows",
+        "shell": "PowerShell",
+        "workspace": "D:\\KNACK SEKHAR LAB\\upsk-system-design-workspace",
+        "app_detected": false,
+        "available_tools": {
+          "node": "v22.20.0",
+          "npm": "10.9.3",
+          "pnpm": "11.25.0",
+          "pip": "26.0.1 (Python 3.14)",
+          "git": "2.52.0.windows.1",
+          "curl": "8.22.0"
+        },
+        "missing_or_unavailable": [
+          "py and python launchers could not start",
+          "docker is not installed or not available on PATH"
+        ]
+      },
+      "answers": [
+        {
+          "question": "self_rating",
+          "answer": "ok"
+        },
+        {
+          "question": "health_vs_readiness",
+          "answer": "Health checks whether the service is running; readiness checks whether it is prepared to accept and handle incoming requests."
+        },
+        {
+          "question": "redirect_misuse",
+          "answer": "An attacker could misuse the URL shortener to hide a malicious or phishing website behind a trusted-looking short link and trick users into clicking it to steal their personal information or login credentials."
+        },
+        {
+          "question": "first_checks_for_500",
+          "answer": "First, check application logs and the stack trace to locate the error and failing request. Second, check the database and other dependencies for connection failures, timeouts, or unavailable resources."
+        },
+        {
+          "question": "idempotency_and_background_jobs",
+          "answer": "Idempotency means repeating an operation produces the same final result without duplicate effects. It matters for background jobs because retries after failure or interruption should not create duplicate records, payments, or other unintended actions."
+        },
+        {
+          "question": "database_index_tradeoff",
+          "answer": "A database index speeds up reads by helping the database find records, but slows inserts, updates, and deletes because those changes must also update the index."
+        },
+        {
+          "question": "testing_style",
+          "answer": "Prefer mostly small isolated tests because they are faster, easier to debug, and pinpoint component problems; also include integration tests to verify API, database, and services work together."
+        },
+        {
+          "question": "environment_preference",
+          "answer": "Comfortable with Windows PowerShell for commands, folders, packages, and development tools; willing to learn Bash or WSL if needed."
+        },
+        {
+          "question": "environment_preference",
+          "answer": "Comfortable with Windows PowerShell for commands, folders, packages, and development tools; willing to learn Bash or WSL if needed."
+        }
+      ]
+    },
+    "product_scenario": {
+      "slug": "public_consumer",
+      "name": "Public Consumer Service (Abuse First)",
+      "rationale": "Practical and easy to understand.",
+      "goals": [
+        "Create short links and redirect visitors to original URLs",
+        "Validate URLs",
+        "Handle anonymous traffic safely",
+        "Prevent malicious links",
+        "Provide basic analytics safely"
+      ]
+    },
+    "module_progress": {
+      "skill_slug": "system-design-fundamentals",
+      "module_01": {
+        "status": "complete",
+        "report_score_out_of_10": 8.8
+      },
+      "module_02": {
+        "status": "complete",
+        "report_score_out_of_10": 8.8
+      },
+      "next": {
+        "module": 7,
+        "step": "build"
+      },
+      "module_04": {
+        "status": "complete",
+        "report_score_out_of_10": 8.0
+      },
+      "module_05": {
+        "status": "complete",
+        "report_score_out_of_10": 8.0
+      },
+      "module_06": {
+        "status": "complete",
+        "report_score_out_of_10": 8.0
+      }
+    }
+  },
+  "decisions": {
+    "module_07": {
+      "jobs_strategy": "async_queue",
+      "retention_days": 30
+    }
+  }
+}

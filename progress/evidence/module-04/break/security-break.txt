@@ -1,0 +1,58 @@
+SCENARIO 1: protected endpoint without JWT
+Expected: HTTP 401
+Actual: HTTP 401
+Security weakness: None observed.
+SCENARIO 2: invalid JWT
+Expected: HTTP 401
+Actual: HTTP 401
+Security weakness: None observed.
+SCENARIO 3: expired JWT
+Expected: HTTP 401
+Actual: HTTP 401
+Security weakness: None observed.
+SCENARIO 7: excessive link creation beyond 30/minute
+Expected: HTTP 429 on request 31 for one principal
+Actual: HTTP 201
+Security weakness: Create limiter did not enforce the configured threshold.
+SCENARIO 4: Alice accesses Bob's link
+Expected: HTTP 404
+Actual: HTTP 404
+Security weakness: None observed.
+SCENARIO 5: Bob accesses Alice's analytics
+Expected: HTTP 404
+Actual: HTTP 404
+Security weakness: None observed.
+SCENARIO 10: public redirect without authentication
+Expected: HTTP 302
+Actual: HTTP 302
+Security weakness: None observed.
+SCENARIO 8: excessive redirect requests beyond 120/minute
+Expected: HTTP 429 on request 121
+Actual: HTTP 429
+Security weakness: None observed.
+SCENARIO 9: excessive analytics requests beyond 60/minute
+Expected: HTTP 429 on request 61
+Actual: HTTP 429
+Security weakness: None observed.
+SCENARIO 6: excessive login requests beyond 10/minute
+Expected: HTTP 429 after 10 requests from one client
+Actual: HTTP 429
+Security weakness: None observed.
+Redirect click events recorded: PASS (120)
+Overall BREAK result: FAIL
+Cleanup: deleted 31 test link records and their click events.
+
+CORRECTION: ORIGINAL CREATE-LINK RATE-LIMIT COUNT
+Initial Alice link creation: 1 request.
+Loop iterations: 28 requests.
+Final attempted creation: 1 request.
+Actual total: 30 requests, not 31.
+Actual final response: HTTP 201.
+The original evidence incorrectly labelled the final attempted creation as request 31.
+The HTTP 201 response was therefore correct because it was request 30, within the 30/minute limit.
+
+CORRECTED CREATE-LINK RATE-LIMIT RESULT
+Requests 1-30: HTTP 201.
+Request 31: HTTP 429.
+Rate limiter implementation: working correctly.
+Initial issue: test counting error only; no implementation vulnerability was found.

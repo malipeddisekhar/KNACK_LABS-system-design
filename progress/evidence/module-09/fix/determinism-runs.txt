@@ -1,0 +1,91 @@
+================================================================================
+Module 9 FIX — Deterministic Module 9 E2E Verification
+================================================================================
+PostgreSQL Service: postgresql-x64-18 (Running)
+Host: localhost:5432
+Dedicated Test Database: url_shortener_test
+Development Database: url_shortener (untouched)
+
+PREFLIGHT DATABASE VERIFICATION:
+- TEST_DATABASE_URL verified from environment: points strictly to url_shortener_test
+- SELECT current_database() returned: url_shortener_test
+- Initial url_shortener_test counts: { links: '0', clicks: '0', migrations: '4' }
+- Initial development (url_shortener) counts: { links: '13', clicks: '255', migrations: '4' }
+- Database Safety Guard: Active and preserved (rejects any non-url_shortener_test target)
+- BREAK simulation flag: Unset (normal execution against url_shortener_test)
+
+TEST SUITE COMMAND:
+node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json module-09.e2e-spec.ts --runInBand
+
+--------------------------------------------------------------------------------
+RUN 1 OF 3
+--------------------------------------------------------------------------------
+Database Identity: url_shortener_test
+Exit Code: 0
+Result: PASS (6 of 6 passed)
+Time: 3.07 s
+
+Test Details:
+  √ 1. Authenticated link creation › creates a link via POST /links when authenticated and returns HTTP 201 with destination URL (104 ms)
+  √ 2. URL redirect › redirects GET /r/:code to the destination URL with HTTP 302 and exact Location header (758 ms)
+  √ 3. Protected-route authentication › rejects unauthenticated GET /links with HTTP 401 and returns no protected data (4 ms)
+  √ 4. Owner scoping (IDOR prevention) › returns HTTP 404 when Bob attempts to access Alice's link via GET /links/:id (15 ms)
+  √ 5. Click analytics retention enforcement › enforces retention by purging expired click events and excluding them from analytics queries (64 ms)
+  √ 6. URL validation › rejects documented bypass string http%3A%2F%2Fevil.example.com with HTTP 400 without storing it (9 ms)
+
+Post-Run 1 Database State:
+  url_shortener_test: { links: '0', clicks: '0', migrations: '4' } (deterministic cleanup confirmed)
+
+--------------------------------------------------------------------------------
+RUN 2 OF 3
+--------------------------------------------------------------------------------
+Database Identity: url_shortener_test
+Exit Code: 0
+Result: PASS (6 of 6 passed)
+Time: 3.428 s
+
+Test Details:
+  √ 1. Authenticated link creation › creates a link via POST /links when authenticated and returns HTTP 201 with destination URL (73 ms)
+  √ 2. URL redirect › redirects GET /r/:code to the destination URL with HTTP 302 and exact Location header (919 ms)
+  √ 3. Protected-route authentication › rejects unauthenticated GET /links with HTTP 401 and returns no protected data (5 ms)
+  √ 4. Owner scoping (IDOR prevention) › returns HTTP 404 when Bob attempts to access Alice's link via GET /links/:id (29 ms)
+  √ 5. Click analytics retention enforcement › enforces retention by purging expired click events and excluding them from analytics queries (186 ms)
+  √ 6. URL validation › rejects documented bypass string http%3A%2F%2Fevil.example.com with HTTP 400 without storing it (6 ms)
+
+Post-Run 2 Database State:
+  url_shortener_test: { links: '0', clicks: '0', migrations: '4' } (deterministic cleanup confirmed)
+
+--------------------------------------------------------------------------------
+RUN 3 OF 3
+--------------------------------------------------------------------------------
+Database Identity: url_shortener_test
+Exit Code: 0
+Result: PASS (6 of 6 passed)
+Time: 4.959 s
+
+Test Details:
+  √ 1. Authenticated link creation › creates a link via POST /links when authenticated and returns HTTP 201 with destination URL (76 ms)
+  √ 2. URL redirect › redirects GET /r/:code to the destination URL with HTTP 302 and exact Location header (1617 ms)
+  √ 3. Protected-route authentication › rejects unauthenticated GET /links with HTTP 401 and returns no protected data (8 ms)
+  √ 4. Owner scoping (IDOR prevention) › returns HTTP 404 when Bob attempts to access Alice's link via GET /links/:id (38 ms)
+  √ 5. Click analytics retention enforcement › enforces retention by purging expired click events and excluding them from analytics queries (89 ms)
+  √ 6. URL validation › rejects documented bypass string http%3A%2F%2Fevil.example.com with HTTP 400 without storing it (6 ms)
+
+Post-Run 3 Database State:
+  url_shortener_test: { links: '0', clicks: '0', migrations: '4' } (deterministic cleanup confirmed)
+
+--------------------------------------------------------------------------------
+POST-RUN INTEGRITY & ISOLATION VERIFICATION
+--------------------------------------------------------------------------------
+Dedicated Test Database (url_shortener_test):
+  - Current database: url_shortener_test
+  - Final counts: { links: '0', clicks: '0', migrations: '4' }
+  - All temporary test links and seeded analytics events were cleanly removed after each run.
+
+Original Development Database (url_shortener):
+  - Current database: url_shortener
+  - Final counts: { links: '13', clicks: '255', migrations: '4' }
+  - Completely untouched before, during, and after all three test executions.
+
+Determinism Result:
+  3 of 3 runs passed (100% determinism). Zero flaky tests. Zero cross-test data pollution.
