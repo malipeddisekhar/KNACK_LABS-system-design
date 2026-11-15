@@ -1,7 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { jest } from '@jest/globals';
+
+// Ensure jest global is available in ESM test executions
+(globalThis as any).jest = jest;
 
 process.env.NODE_ENV = 'test';
+
+const __filenameSafe =
+  typeof __filename !== 'undefined'
+    ? __filename
+    : fileURLToPath(import.meta.url);
+const __dirnameSafe =
+  typeof __dirname !== 'undefined' ? __dirname : path.dirname(__filenameSafe);
 
 /**
  * Extracts the database name from a PostgreSQL connection URL.
@@ -29,7 +41,7 @@ function getExplicitTestDatabaseUrl(): string {
     return process.env.TEST_DATABASE_URL.trim();
   }
 
-  const envPath = path.resolve(__dirname, '../.env');
+  const envPath = path.resolve(__dirnameSafe, '../.env');
   if (fs.existsSync(envPath)) {
     const envContent = fs.readFileSync(envPath, 'utf8');
     for (const line of envContent.split(/\r?\n/)) {

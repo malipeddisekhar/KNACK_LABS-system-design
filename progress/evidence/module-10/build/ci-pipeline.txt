@@ -45,7 +45,14 @@
    - Resolution: Configured `npx prisma generate --config prisma7.test.config.ts`. This directly activates `prisma7.test.config.ts`, enforcing that `TEST_DATABASE_URL` is explicitly set and matches `url_shortener_test` exactly.
    - Compatibility: Verified locally that `prisma generate --config prisma7.test.config.ts` is fully compatible and generates the client into `src/generated/prisma` in ~55ms.
 
-6. Local Syntax and Command Validation:
+6. CI Bugfix & Jest ESM Module Loading Resolution:
+   - Root Cause: In NestJS v12, `@nestjs/common`, `@nestjs/core`, and `@nestjs/testing` are published with `"type": "module"` (pure ES modules). In Jest 30 on Node.js 22, Jest's CommonJS loader (`CjsLoader`) cannot synchronously `require()` ES modules because `SourceTextModule.prototype.hasAsyncGraph` is only available in Node 24.9+. Because `jest.config.ts` lacked `extensionsToTreatAsEsm: ['.ts']` and `ts-jest` lacked `{ useESM: true }`, Jest compiled TypeScript test files into CommonJS and tried to `require('@nestjs/common')`, resulting in `createRequireEsmError: Must use import to load ES Module`.
+   - Resolution:
+     1. Updated `api/jest.config.ts` and `api/test/jest-e2e.json` with `extensionsToTreatAsEsm: ['.ts']` and configured `ts-jest` with `useESM: true` and `tsconfig: { module: 'ESNext' }`. This allows Jest to load test modules natively as ES modules via Node's VM modules runner (`node --experimental-vm-modules`).
+     2. Updated `api/test/setup-test-db.ts` to export global `jest` via `import { jest } from '@jest/globals'; (globalThis as any).jest = jest;` so that all existing tests and assertions (`jest.fn()`, `jest.Mock`) continue working seamlessly without requiring code changes to individual test files.
+     3. Ensured `__dirname` in `setup-test-db.ts` is safely derived using `fileURLToPath(import.meta.url)` in ESM contexts while preserving CommonJS backward compatibility.
+
+7. Local Syntax and Command Validation:
    - YAML Syntax Validation: Verified valid YAML structure without tabs or indentation syntax errors.
    - Script Names: All script invocations match actual package.json scripts (lint, build, test, test:e2e).
    - Migration Command: Matches prisma7.test.config.ts and schema.prisma. Verified offline via `prisma migrate status --config prisma7.test.config.ts`.
@@ -56,6 +63,6 @@
      * E2E Tests: 9/9 suites passed (69/69 tests passed).
    - Database Safety: Target database url_shortener_test strictly verified; development database url_shortener remains untouched (13 links, 255 clicks, 4 migrations).
 
-7. Execution Status:
-   - CI workflow `.github/workflows/ci.yml` is updated and verified.
+8. Execution Status:
+   - CI workflow and Jest test configurations verified locally.
    - Ready for review (no git commit or push executed per prompt restrictions).

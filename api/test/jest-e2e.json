@@ -1,4 +1,5 @@
 {
+  "extensionsToTreatAsEsm": [".ts"],
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
   "testEnvironment": "node",
@@ -8,6 +9,14 @@
     "^(\\.{1,2}/.*)\\.js$": "$1"
   },
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        "useESM": true,
+        "tsconfig": {
+          "module": "ESNext"
+        }
+      }
+    ]
   }
 }

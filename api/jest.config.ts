@@ -11,11 +11,20 @@ const { config: tsconfig } = ts.readConfigFile(
 const paths = tsconfig?.compilerOptions?.paths ?? {};
 
 const config: Config = {
+  extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testRegex: '.*\\.spec\\.ts$',
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: {
+          module: 'ESNext',
+        },
+      },
+    ],
   },
   setupFiles: ['<rootDir>/test/setup-test-db.ts'],
   moduleNameMapper: {
