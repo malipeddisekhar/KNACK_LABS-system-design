@@ -73,7 +73,7 @@ npm run worker
 - **Required Environment Variables**:
   - `DATABASE_URL`
   - `REDIS_URL`
-  - `RETENTION_DAYS` (optional, default: 90)
+  - `RETENTION_DAYS` (optional, default: 30)
 - **Process Verification**:
   Logs emit:
   `[WorkerRunner] Analytics Worker is running and listening for queue jobs...`

@@ -48,7 +48,9 @@ COPY prisma7.config.ts ./
 COPY prisma ./prisma/
 
 # Generate the Prisma 7 client into src/generated/prisma
-RUN npx prisma generate
+# Note: Prisma client code generation analyzes schema.prisma without requiring a live database connection.
+# A non-secret build-only placeholder satisfies Prisma 7 env('DATABASE_URL') validation during the Docker build.
+RUN DATABASE_URL="postgresql://build-only-dummy:build-only-dummy@127.0.0.1:5432/build_only_dummy?schema=public" npx prisma generate
 
 # Copy application source code and TypeScript build configs
 COPY tsconfig*.json nest-cli.json ./

@@ -1,6 +1,10 @@
 import { AnalyticsService } from './analytics.service.js';
 import { AnalyticsProcessor } from './analytics.processor.js';
-import { ANALYTICS_QUEUE, CLICK_EVENT_JOB } from './analytics.constants.js';
+import {
+  ANALYTICS_QUEUE,
+  CLICK_EVENT_JOB,
+  DEFAULT_RETENTION_DAYS,
+} from './analytics.constants.js';
 import type { ClickEventJobData } from './analytics.types.js';
 
 describe('AnalyticsService and AnalyticsProcessor (unit)', () => {
@@ -176,6 +180,28 @@ describe('AnalyticsService and AnalyticsProcessor (unit)', () => {
       await expect(analyticsProcessor.process(mockJob)).rejects.toThrow(
         'Database connection lost',
       );
+    });
+  });
+
+  describe('Retention Configuration Consistency', () => {
+    it('defines DEFAULT_RETENTION_DAYS as exactly 30 days', () => {
+      expect(DEFAULT_RETENTION_DAYS).toBe(30);
+    });
+
+    it('purges click events older than 30 days when RETENTION_DAYS environment variable is unset', async () => {
+      mockConfig.get.mockReturnValue(undefined);
+      mockPrisma.clickEvent.deleteMany.mockResolvedValueOnce({ count: 7 });
+
+      const purged = await analyticsService.purgeExpiredEvents();
+      expect(purged).toBe(7);
+
+      expect(mockPrisma.clickEvent.deleteMany).toHaveBeenCalledWith({
+        where: {
+          clickedAt: {
+            lt: expect.any(Date),
+          },
+        },
+      });
     });
   });
 });

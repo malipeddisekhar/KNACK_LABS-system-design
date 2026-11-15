@@ -13,7 +13,7 @@ This document specifies all environment variables required by the URL Shortener 
 | `PORT` | **Required** (defaults to 3000) | Not Needed | Not Needed | Not Needed | Port on which NestJS API listens (bound to `0.0.0.0`). Valid range: 1–65535. |
 | `PUBLIC_BASE_URL` | **Required** | Not Needed | Not Needed | Not Needed | Public canonical URL (e.g. `https://short.example.com`). Used to format `short_url` in link creation/retrieval responses. |
 | `JWT_SECRET` | **Required** | Not Needed | Not Needed | Used in tests | Symmetric secret used to sign/verify authentication JWTs. Must be $\ge$ 32 characters with diverse character set. |
-| `RETENTION_DAYS` | Optional (default: 90) | Optional (default: 90) | Not Needed | Optional | Number of days to retain click event telemetry before purging via `purgeExpiredClicks`. |
+| `RETENTION_DAYS` | Optional (default: 30) | Optional (default: 30) | Not Needed | Optional | Number of days to retain click event telemetry before purging via `purgeExpiredClicks`. |
 | `TEST_DATABASE_URL` | **Forbidden in Prod** | **Forbidden in Prod** | **Forbidden in Prod** | **Required** in Tests | Dedicated test database connection string. Guarded strictly: tests fail immediately if target database is not `url_shortener_test`. |
 
 ---
