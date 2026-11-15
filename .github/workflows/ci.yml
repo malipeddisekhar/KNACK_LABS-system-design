@@ -66,7 +66,7 @@ jobs:
         run: npm ci
 
       - name: Generate Prisma 7 Client
-        run: npx prisma generate
+        run: npx prisma generate --config prisma7.test.config.ts
 
       - name: Apply Prisma migrations to isolated test database
         run: npx prisma migrate deploy --config prisma7.test.config.ts
