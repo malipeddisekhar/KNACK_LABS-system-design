@@ -98,6 +98,6 @@ USER node
 EXPOSE 3000
 
 # Default command: run the API service
-# To run worker: override command with ["npm", "run", "worker"]
+# To run worker: override command with ["node", "dist/worker.js"]
 # To run migrations: override command with ["prisma", "migrate", "deploy"]
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]

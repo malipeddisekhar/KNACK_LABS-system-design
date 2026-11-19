@@ -119,7 +119,7 @@ Verify that background analytics processing is active:
    ```
 3. **Verify analytics endpoint**:
    ```bash
-   curl -H "Authorization: Bearer <token>" http://<api-host>:<port>/links/<link-id>/analytics
+   curl -H "Authorization: Bearer [REDACTED] http://<api-host>:<port>/links/<link-id>/analytics
    ```
    Confirm `total_clicks` reflects the redirect event.
 
@@ -132,3 +132,4 @@ Verify that background analytics processing is active:
 | **Migration Job Fails** | **Halt deployment immediately**. Do NOT proceed with API or Worker rollout. | Existing API and Worker continue serving traffic safely against unchanged schema. |
 | **API Readiness Returns 503** | Platform halts rolling update. Keep previous API instances receiving traffic. | Check PostgreSQL / Redis connectivity and error logs. Fix dependency outage before retrying. |
 | **Worker Crashes on Boot** | Platform restarts previous worker version. | Queue producer in API remains healthy. Redis BullMQ queue holds pending jobs up to retention limits. Durable fallback saves events directly to DB if queue is impaired. |
+

@@ -1,0 +1,153 @@
+================================================================================
+Module 10 FIX Evidence: Platform Port Binding, Docker Runtime & Graceful Shutdown
+Date: 2026-11-18
+Workspace: D:\KNACK SEKHAR LAB\upsk-system-design-workspace
+Repository: https://github.com/malipeddisekhar/KNACK_LABS-system-design.git
+================================================================================
+
+1. Controlled Fault & Misconfiguration Diagnosis
+--------------------------------------------------------------------------------
+- Component: API bootstrap entrypoint (api/src/main.ts)
+- Root Cause / Defect:
+  The application parsed the platform-assigned PORT from environment variables
+  (via ConfigService), but line 39 contained a hardcoded port:
+    await app.listen(3000, '0.0.0.0');
+- Observed BREAK Symptom:
+  When the deployment platform assigned PORT=43127, the application continued
+  listening on port 3000. Requests sent to the platform-assigned port 43127
+  failed with ECONNREFUSED, causing health check failures and deployment rollbacks.
+
+2. Code Remediation
+--------------------------------------------------------------------------------
+- api/src/main.ts:
+  Restored dynamic platform port binding:
+  ```diff
+  -  // BREAK simulation: intentionally ignore the platform-assigned PORT.
+  -  await app.listen(3000, '0.0.0.0');
+  +  await app.listen(resolvedPort, '0.0.0.0');
+  ```
+  Where `resolvedPort = port ?? 3000`, bound to `0.0.0.0` for container networking.
+
+- api/Dockerfile:
+  Updated default runner CMD to execute Node directly instead of npm:
+  ```diff
+  -CMD ["npm", "run", "start:prod"]
+  +CMD ["node", "dist/main.js"]
+  ```
+  Ensures Node runs as PID 1, receiving OS SIGTERM directly without intermediate
+  shell/npm signal swallowing, enabling clean zero-exit-code graceful termination.
+
+- .github/workflows/ci.yml:
+  Added Docker Buildx `load: true` and an automated container runtime verification step
+  with isolated test services, testing `/health`, `/ready` (200 & 503), port binding,
+  and SIGTERM shutdown within the CI pipeline.
+
+3. Production Docker Image Build
+--------------------------------------------------------------------------------
+- Command:
+  docker build -t url-shortener-api:latest -f api/Dockerfile api
+- Build Result:
+  Multi-stage build succeeded (dependencies -> builder -> runner).
+  Prisma 7 client generated inside builder using non-secret build-only dummy URL.
+  Runner stage uses non-root user `node` (UID 1000).
+  Image ID: sha256:396d7e6647eabe5ec0e320b41c628748dc178e7bf2e485f869b9d725942307da
+
+4. Container Runtime Verification (Port 43127 & Isolated Dependencies)
+--------------------------------------------------------------------------------
+- Isolated Dependencies:
+  - Docker network: test-net (bridge)
+  - test-postgres: postgres:16-alpine (isolated db: url_shortener_test)
+  - test-redis: redis:7-alpine
+- Container Launch:
+  docker run -d --name app-container \
+    --network test-net \
+    -p 43127:43127 \
+    -e PORT=43127 \
+    -e NODE_ENV=production \
+    -e PUBLIC_BASE_URL=http://localhost:43127 \
+    -e DATABASE_URL=[REDACTED] \
+    -e REDIS_URL=[REDACTED] \
+    -e JWT_SECRET=[REDACTED] \
+    -e RETENTION_DAYS=30 \
+    url-shortener-api:latest
+
+- Port Binding Verification:
+  - Port 43127 (Platform assigned): LISTENING = True
+  - Port 3000 (Hardcoded legacy):  LISTENING = False (TCP connect failed)
+  Conclusion: The application strictly honours the configured platform PORT=43127.
+
+- Health Endpoint:
+  - Request:  GET http://localhost:43127/health
+  - Response: HTTP 200 OK
+  - Body:     {"ok":true}
+
+- Readiness Endpoint (Dependencies Healthy):
+  - Request:  GET http://localhost:43127/ready
+  - Response: HTTP 200 OK
+  - Body:     {"status":"ready","checks":{"database":"up","redis":"up"}}
+
+5. Readiness Failure Handling (HTTP 503 on Dependency Outage)
+--------------------------------------------------------------------------------
+- Test Setup:
+  Secondary container launched with invalid Redis host:
+  REDIS_URL=[REDACTED] on port 43128.
+- Verification:
+  - GET http://localhost:43128/health -> HTTP 200 OK (process healthy)
+  - GET http://localhost:43128/ready  -> HTTP 503 Service Unavailable
+  - Body: {"status":"not_ready","checks":{"database":"up","redis":"down"}}
+- Conclusion:
+  Readiness probe correctly distinguishes application process health from
+  dependency readiness, returning HTTP 503 without crashing the container.
+
+6. Graceful Shutdown & SIGTERM Handling
+--------------------------------------------------------------------------------
+- Shutdown Command:
+  docker stop -t 15 app-container
+- Shutdown Measurement:
+  - Duration: 0.306s (well within the 15-second grace period)
+  - Exit Code: 0 (clean graceful shutdown)
+- Lifecycle Logs:
+  - NestJS shutdown hooks invoked via app.enableShutdownHooks()
+  - Active keep-alive connections drained
+  - Prisma database connections closed ($disconnect)
+  - Redis connection cleanly disconnected
+
+7. Full Local Test Suite Results
+--------------------------------------------------------------------------------
+- Linting (oxlint --type-aware src/ test/):
+  - Result: 0 warnings, 0 errors (70 files, 111 rules, 600ms)
+- Production Build (nest build):
+  - Result: Exit code 0 (dist/ generated cleanly)
+- Unit Test Suite (npm test -- --forceExit):
+  - Result: 7 test suites passed, 34 tests passed, 0 failed
+  - Suites:
+    * src/links/pagination-boundary.spec.ts (PASS)
+    * src/app.controller.spec.ts (PASS)
+    * src/ready.controller.spec.ts (PASS)
+    * src/analytics/analytics.service.spec.ts (PASS)
+    * src/worker.shutdown.spec.ts (PASS)
+    * src/worker.module.spec.ts (PASS)
+    * src/app.module.spec.ts (PASS)
+- End-to-End Test Suite (npm run test:e2e -- --runInBand --forceExit):
+  - Database Guard: Isolated target url_shortener_test verified
+  - Result: 9 test suites passed, 69 tests passed, 0 failed
+  - Suites:
+    * test/module-07.e2e-spec.ts (PASS)
+    * test/module-09.e2e-spec.ts (PASS)
+    * test/module-08.e2e-spec.ts (PASS)
+    * test/module-05.e2e-spec.ts (PASS)
+    * test/module-06.e2e-spec.ts (PASS)
+    * test/module-10.e2e-spec.ts (PASS)
+    * test/module-03.e2e-spec.ts (PASS)
+    * test/module-04.e2e-spec.ts (PASS)
+    * test/app.e2e-spec.ts (PASS)
+
+8. Security and Isolation Guarantees
+--------------------------------------------------------------------------------
+- No production database credentials or connection strings were used.
+- All migrations and tests executed strictly against isolated `url_shortener_test`.
+- Development database `url_shortener` was left completely untouched.
+- Sensitive environment variables are redacted in evidence and logs.
+- Temporary test containers and Docker networks were cleanly dismantled.
+================================================================================
+

@@ -21,8 +21,8 @@
 
 3. Environment Variables (CI-Safe & Isolated):
    - NODE_ENV: test
-   - TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/url_shortener_test?schema=public
-   - REDIS_URL: redis://localhost:6379
+   - TEST_DATABASE_URL: [REDACTED_CONNECTION_STRING]
+   - REDIS_URL: [REDACTED_CONNECTION_STRING]
    - JWT_SECRET: ci-testing-jwt-secret-minimum-32-characters-entropy
    - PORT: 3000
    - PUBLIC_BASE_URL: http://localhost:3000
@@ -64,7 +64,7 @@
 
 8. Docker Production Image Build Remediation:
    - Issue: The Docker multi-stage builder executes `npx prisma generate`, which triggers `prisma7.config.ts`'s strict `env('DATABASE_URL')` validation. Without `DATABASE_URL` set during Docker build, generation fails.
-   - Resolution: Configured `DATABASE_URL="postgresql://build-only-dummy:build-only-dummy@127.0.0.1:5432/build_only_dummy?schema=public" npx prisma generate` in the `builder` stage. Prisma client generation parses only `schema.prisma` without network/database connectivity, preserving non-root runner isolation and preventing secret leakage.
+   - Resolution: Configured `DATABASE_URL=[REDACTED] npx prisma generate` in the `builder` stage. Prisma client generation parses only `schema.prisma` without network/database connectivity, preserving non-root runner isolation and preventing secret leakage.
    - CI Verification Step: Added `docker/setup-buildx-action@v3` and `docker/build-push-action@v6` to `.github/workflows/ci.yml` to automatically verify image build in GitHub Actions.
 
 9. Retention Period Consistency:
@@ -97,3 +97,4 @@
 12. Execution Status:
    - All four remediation tasks implemented and verified locally.
    - Ready for review (no git commit or push executed per prompt restrictions).
+

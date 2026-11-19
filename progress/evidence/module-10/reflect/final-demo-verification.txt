@@ -1,0 +1,65 @@
+# Module 10 — Final Demo Verification Evidence
+
+Date: 2026-11-18
+
+## Provenance
+
+- Results marked learner-reported are preserved from the learner's supplied outputs.
+- Search behavior, database identity, cache invalidation, Docker states, and shutdown logs were independently checked by the reviewer during this review.
+- Unit and E2E test summaries are from the existing FIX evidence file; tests were not rerun during this review.
+- Credentials, JWTs, and connection strings are omitted or redacted.
+
+## Health, readiness, and access
+
+Learner-reported:
+- `GET /health`: HTTP 200, `{"ok":true}`.
+- `GET /ready`: HTTP 200, PostgreSQL and Redis reported up.
+- Unauthenticated `POST /links`: HTTP 401, code `UNAUTHORIZED`.
+- Authenticated `POST /links`: HTTP 201; link ID `2678a967-9ca1-42a1-a2fc-fd6c5b62baae`, short code `Lx5aID7E`.
+- Initial public `GET /r/Lx5aID7E`: HTTP 302, Location `https://example.com/`.
+
+## Database identity
+
+Read-only `SELECT current_database()` inside both `app-container` and `url-shortener-worker`: `url_shortener_test` (exit code 0 for each).
+
+## Cache invalidation
+
+Reviewer executed with Alice's credentials read in memory from the local development test configuration; no credential or token was printed:
+- Login: HTTP 201.
+- Authenticated link preflight: HTTP 200; expected ID/code and original destination matched.
+- Authenticated PATCH to `https://example.org`: HTTP 200; returned normalized destination `https://example.org/`.
+- Public redirect with redirect-following disabled: HTTP 302; `Location: https://example.org/`.
+
+## Search and pagination
+
+Reviewer executed the authenticated requested query:
+- `q=example&page=1&page_size=10`: HTTP 200; keys `items`, `page`, `page_size`, `total`; page 1, page_size 10, total 0, returned 0.
+- Read-only SQL in `url_shortener_test` confirmed `to_tsvector('simple', 'https://example.org/')` yields the lexeme `example.org`; `plainto_tsquery('simple', 'example')` does not match it.
+- Diagnostic full-lexeme query `q=example.org&page=1&page_size=10`: HTTP 200; page 1, page_size 10, total 1; returned the demo link.
+- This is consistent with the selected PostgreSQL FTS design. Existing Module 8 E2E tests cover pagination and the 1–100 page-size boundary.
+
+## Graceful shutdown
+
+API:
+- `docker stop --timeout 15 app-container`: CLI exit 0.
+- Container state: `exited`; process exit code 0; OOM false.
+- No explicit shutdown-specific line was found by the captured log filter.
+
+Worker:
+- Container: `url-shortener-worker`; command `node dist/worker.js`; network `test-net`.
+- Container state: `exited`; process exit code 0; OOM false.
+- Captured lifecycle logs:
+  - `[WorkerRunner] Analytics Worker is running and listening for queue jobs...`
+  - `[AnalyticsWorker] Persisted click event: ... linkId=2678a967-9ca1-42a1-a2fc-fd6c5b62baae`
+  - `[WorkerRunner] Received SIGTERM. Shutting down Analytics Worker gracefully...`
+  - `[WorkerRunner] Analytics Worker shut down cleanly.`
+- Earlier `npm run worker` startup exited 1 on SIGTERM; direct Node execution as PID 1 resolved this. Neither container was removed; PostgreSQL and Redis were left running.
+
+## Existing test evidence
+
+Source: `progress/evidence/module-10/fix/runtime-port-fix-verification.txt`
+- Unit tests: 7 suites, 34 passed, 0 failed.
+- E2E tests: 9 suites, 69 passed, 0 failed.
+- E2E database guard: `url_shortener_test`.
+- These saved results were inspected; tests were not rerun.
+

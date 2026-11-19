@@ -1,0 +1,27 @@
+Module 10 BREAK — Medium scenario: application port differs from platform-assigned PORT
+Date: 2026-11-15
+
+Controlled injection
+- File: api/src/main.ts
+- Temporary fault: the bootstrap reads the configured PORT but calls app.listen(3000, '0.0.0.0').
+- Simulated platform assignment: PORT=43127.
+
+Build evidence
+- npm run build could not start because the globally installed npm launcher resolved an invalid npm-prefix.js path.
+- Workaround: node .\node_modules\@nestjs\cli\bin\nest.js build
+- Result: EXITCODE=0. The compiled dist/main.js contains the controlled port mismatch.
+
+Bootstrap-level reproduction
+- Harness imported the compiled dist/main.js and mocked NestFactory.create so database and Redis services were not initialized.
+- The harness used an actual local HTTP server returned by the mocked Nest application.
+- The actual main bootstrap requested listen port 3000 while process.env.PORT was 43127.
+- Server address: 0.0.0.0:3000.
+- GET http://127.0.0.1:3000/health -> HTTP 200 {"ok":true}
+- GET http://127.0.0.1:43127/health -> ECONNREFUSED (no listener).
+- The harness server was closed after the requests.
+
+Scope and limitations
+- This demonstrates the port-mismatch symptom through the actual compiled main bootstrap, with NestFactory mocked to isolate port binding.
+- A full Nest application smoke test was not completed because local PostgreSQL (localhost:5432) and Redis (localhost:6379) were unavailable.
+- The process was run with NODE_ENV=test and the configured TEST_DATABASE_URL target was verified as url_shortener_test. The isolated harness did not connect to any database or Redis service and performed no database writes.
+- No deployment was attempted. This BREAK fault remains temporary and is expected to be removed during FIX.

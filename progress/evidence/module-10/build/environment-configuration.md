@@ -8,8 +8,8 @@ This document specifies all environment variables required by the URL Shortener 
 
 | Variable Name | API Service | Background Worker | One-Off Migration Job | CI / Local Tests | Description / Constraints |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| `DATABASE_URL` | **Required** | **Required** | **Required** | Ignored in tests | PostgreSQL connection string (`postgresql://user:pass@host:port/db?schema=public`). Used by Prisma ORM and migration engine. |
-| `REDIS_URL` | **Required** | **Required** | Not Needed | Optional/Ignored | Redis connection string (`redis://...` or `rediss://...` for TLS). Used by CacheService and BullMQ queue (`analytics-queue`). |
+| `DATABASE_URL` | **Required** | **Required** | **Required** | Ignored in tests | PostgreSQL connection string (`[REDACTED_CONNECTION_STRING]). Used by Prisma ORM and migration engine. |
+| `REDIS_URL` | **Required** | **Required** | Not Needed | Optional/Ignored | Redis connection string (`[REDACTED_CONNECTION_STRING] or `[REDACTED_CONNECTION_STRING] for TLS). Used by CacheService and BullMQ queue (`analytics-queue`). |
 | `PORT` | **Required** (defaults to 3000) | Not Needed | Not Needed | Not Needed | Port on which NestJS API listens (bound to `0.0.0.0`). Valid range: 1–65535. |
 | `PUBLIC_BASE_URL` | **Required** | Not Needed | Not Needed | Not Needed | Public canonical URL (e.g. `https://short.example.com`). Used to format `short_url` in link creation/retrieval responses. |
 | `JWT_SECRET` | **Required** | Not Needed | Not Needed | Used in tests | Symmetric secret used to sign/verify authentication JWTs. Must be $\ge$ 32 characters with diverse character set. |
@@ -54,3 +54,4 @@ The following variables found in legacy configurations have been analyzed and co
 2. **Docker Isolation**: `.dockerignore` excludes all `.env`, `.env.*`, and `*.local` files so that production images built from the repository remain strictly free of credentials.
 3. **Runtime Injection**: Inject configuration dynamically at runtime via platform environment variables (e.g., Railway environment variables, Kubernetes secrets).
 4. **Credential Masking**: Health and readiness endpoints (`/health`, `/ready`) strictly sanitize outputs and never return connection strings, credentials, or raw database driver errors.
+
