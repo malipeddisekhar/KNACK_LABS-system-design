@@ -1,0 +1,12 @@
+{
+  "summary": "Locked in canonical product scenario 'skillswap' for Decomposition & Execution Planning. Recorded bootcamp.product_scenario = 'skillswap' in progress/state.json. Documented SkillSwap marketplace requirements, provider/learner workflows, concurrency constraints (double-booking prevention), cancellation policies, commission tracking, and multi-city expansion readiness in progress/decomposition/module-01/product-scenario.md.",
+  "evidence": [
+    "Recorded 'bootcamp.product_scenario = skillswap' in progress/state.json.",
+    "Documented SkillSwap marketplace domain model, actors, and architectural constraints in progress/decomposition/module-01/product-scenario.md.",
+    "Committed to consistent scenario grounding across all 8 modules."
+  ],
+  "artifacts": [
+    "progress/state.json",
+    "progress/decomposition/module-01/product-scenario.md"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "summary": "Completed Module 08 CONTEXT on deployment verification for url-shortener-api. Distinguished process liveness (/health) from dependency readiness (/ready), requiring evidence of real traffic service before declaring deploy complete, and defining immediate rollback criteria under HighErrorRate alerts.",
+  "evidence": [
+    "Liveness (/health) confirms only the Node.js event loop and HTTP listener are active ({ ok: true }), which misses database connection string typos, Redis disconnects, and credential corruption.",
+    "Readiness (/ready) actively executes SELECT 1 on PostgreSQL and PING on Redis with bounded 2,000 ms timeouts, returning 503 if dependencies fail and preventing the routing of traffic to unready containers.",
+    "Post-deployment verification requires active smoke testing and metrics inspection (http_requests_total, overflow counters, error rates) before declaring deployment success, with HighErrorRate (>5% 5xx) triggering automated rollback to local/upsk-system-design-api:rollback."
+  ],
+  "artifacts": [
+    "progress/production-readiness/module-08/context-proof.json"
+  ]
+}

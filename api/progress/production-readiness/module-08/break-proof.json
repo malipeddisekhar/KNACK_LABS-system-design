@@ -1,0 +1,12 @@
+{
+  "summary": "Completed Module 08 BREAK for Deploy & Verify. Diagnosed all three production issues in break-diagnosis.md: (1) business endpoint failure while /ready returns 200 due to shallow SELECT 1 connectivity masking unapplied Prisma table migrations or JWT_SECRET desynchronization; (2) climbing process heap memory leak due to unbounded event listeners or retained request contexts not monitored by /ready; and (3) out-of-band configuration drift caused by manual web console edits bypassing GitOps pipelines.",
+  "evidence": [
+    "Authored progress/production-readiness/module-08/break-diagnosis.md documenting clinical root-cause diagnoses for all three production failure modes.",
+    "Issue 1 diagnosis: /ready executes shallow SELECT 1 and PING probes which succeed even when database tables are missing or JWT_SECRET is mismatched, causing business endpoints to return 500/401 while readiness reports 200 OK.",
+    "Issue 2 diagnosis: Climbing memory in process_resident_memory_bytes stems from uncleaned SSE/event listeners or unpruned request contexts in heap memory, which /ready does not monitor.",
+    "Issue 3 diagnosis: Out-of-band platform UI modification desynchronizes production environment variables from Git source of truth, causing pipeline overwrite hazards."
+  ],
+  "artifacts": [
+    "progress/production-readiness/module-08/break-diagnosis.md"
+  ]
+}

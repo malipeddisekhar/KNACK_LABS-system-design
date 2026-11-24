@@ -1,0 +1,11 @@
+{
+  "summary": "Completed Knight Capital Interlude ($440M in 45 Minutes) reflection between Module 07 and Module 08. Addressed deployment atomicity across all instances vs manual per-server drift, dead-code retirement and feature flag lifecycle governance to prevent accidental reactivation, and the necessity of immediate kill-switch controls and automated rollback verification when a service is up but actively causing damage.",
+  "evidence": [
+    "Question 1 (Deployment Atomicity & Fleet Verification): Manual per-server copying inevitably allows instances to fall behind or run split-brain versions. In modern pipelines (and Module 08), deploys must be orchestrated atomically through immutable container images tagged by commit SHA. Before traffic is shifted, automated smoke tests must query version/health endpoints on every target instance to verify 100% fleet alignment, failing closed and rolling back if any node reports an unexpected version hash.",
+    "Question 2 (Dead Code & Feature Flag Hygiene): Re-using the feature flag for SMARS reactivated dormant 'Power Peg' logic because dead code was left in the repository. In url-shortener-api, configuration keys and feature paths must have explicit lifecycles: dead code and retired flags must be aggressively purged from the codebase via pull requests rather than left behind flags. Config validators must fail fast on unknown or deprecated environment keys rather than silently falling back to obsolete behaviors.",
+    "Question 3 (Kill Switches & Active-Damage Failure Modes): Traditional runbooks only anticipate 'service is down' failure modes. When a system is up, healthy to liveness probes, but actively corrupting data or flooding external dependencies, operations require an explicit 'Emergency Stop / Kill-Switch' runbook: dropping ingress traffic at the load balancer / reverse proxy, terminating worker consumers (e.g. BullMQ queue pauses), or triggering automated immutable rollbacks within seconds rather than relying on 45 minutes of manual triage."
+  ],
+  "artifacts": [
+    "progress/production-readiness/module-07/interlude-proof.json"
+  ]
+}

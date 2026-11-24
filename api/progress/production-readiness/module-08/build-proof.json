@@ -1,0 +1,20 @@
+{
+  "summary": "Completed Module 08 BUILD for Deploy & Verify. Documented rolling deployment strategy with automated rollback in deploy-and-verify-notes.md. Added /live route alias to HealthController for dedicated process liveness checks alongside /health and /ready. Authored smoke-verify.ps1 automating liveness, readiness, and metrics verification. Executed full verification pass: startup fail-fast drills (missing DATABASE_URL exit 1, invalid NODE_ENV=prod exit 1, production startup redaction), lint exit 0 (6 pre-existing warnings, 0 errors), nest build exit 0, all 13 Jest suites / 78 tests passed, git diff --check exit 0, docker info exit 0 (0 running containers; live container checks marked NOT EXECUTED), and TCP 5432 returned False (live PostgreSQL/HTTP checks marked NOT EXECUTED).",
+  "evidence": [
+    "Authored deploy-and-verify-notes.md covering platform setup, secret-free pre-flight validation, /live vs /ready separation with 2,000 ms dependency timeouts, immutable SHA tagging, and automated rollback drills.",
+    "Updated src/health.controller.ts with @Controller(['health', 'live']) to expose /live route alias alongside /health.",
+    "Created progress/production-readiness/module-08/smoke-verify.ps1 automating pre-traffic verification against /ready (200 OK), /health (200 OK), and /metrics (200 OK).",
+    "Startup fail-fast drills verified: missing DATABASE_URL exits 1, invalid NODE_ENV exits 1, and production error output is sanitized with zero stack traces or secrets.",
+    "Lint passed: oxlint reported 6 pre-existing unbound-method warnings and 0 errors (LINT_EXIT=0).",
+    "Nest build passed: BUILD_EXIT=0.",
+    "Jest test suites: 13 suites and 78 tests passed across all 5 groups (all exits 0).",
+    "git diff --check passed with DIFF_CHECK_EXIT=0; package.json, prisma/, and workspace .env untouched.",
+    "docker info returned exit 0 with 0 running containers; live container checks marked NOT EXECUTED.",
+    "Test-NetConnection 127.0.0.1:5432 returned False; live PostgreSQL and live HTTP checks marked NOT EXECUTED."
+  ],
+  "artifacts": [
+    "progress/production-readiness/module-08/deploy-and-verify-notes.md",
+    "progress/production-readiness/module-08/smoke-verify.ps1",
+    "src/health.controller.ts"
+  ]
+}

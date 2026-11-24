@@ -14,7 +14,35 @@ Use `DatabaseConnectionFailure` as the incident label for connection refusal/DNS
 
 ### Diagnosis checklist
 
-1. Check the local PostgreSQL TCP port:
+Divergence note: A critical runbook failure occurs when configuration drifts—for example, if `DATABASE_URL` was renamed to `DB_CONNECTION_STRING` or removed in `.env` or deployment secrets. Subsequent diagnostic commands like the session query below read `process.env.DATABASE_URL` and receive `undefined`. The database driver then falls back to localhost default sockets or emits ambiguous connection refusal errors, misleading responders into diagnosing an infrastructure outage when the database is fully operational. Step 1 enforces a secret-free pre-flight guard to verify working directory context and environment variable key names before any database or network command is issued.
+
+1. Verify working directory context and environment key names (Config Drift pre-flight guard):
+
+   Execute from the API repository root. Never print connection strings, passwords, or dump `.env` files. Confirm that `DATABASE_URL` exists in the environment and inspect matching database key names without displaying secret values:
+
+   ```powershell
+   node --input-type=module -e "import 'dotenv/config'; const keys = Object.keys(process.env).filter(k => /(DATABASE|DB_|POSTGRES|PG)/i.test(k)).sort(); console.log(JSON.stringify({ cwd: process.cwd(), has_DATABASE_URL: Object.prototype.hasOwnProperty.call(process.env, 'DATABASE_URL') && Boolean(process.env.DATABASE_URL), matching_keys: keys }));"
+   ```
+
+   Healthy expected output (Canonical config):
+   `{"cwd":"D:\\KNACK SEKHAR LAB\\upsk-system-design-workspace\\api","has_DATABASE_URL":true,"matching_keys":["DATABASE_URL","TEST_DATABASE_URL"]}` (or matching database keys with `has_DATABASE_URL: true`).
+
+   Config drift expected output (e.g., variable renamed to `DB_CONNECTION_STRING` or omitted):
+   `{"cwd":"...","has_DATABASE_URL":false,"matching_keys":["DB_CONNECTION_STRING"]}`.
+
+   Action on drift: If `has_DATABASE_URL` is `false`, STOP immediately. Do not attempt database queries, service restarts, or container operations. If `matching_keys` reveals a renamed alias like `DB_CONNECTION_STRING`, escalate the configuration drift or update the runtime configuration to supply `DATABASE_URL` as required by the application contract before continuing.
+
+   To safely verify live process environment key names without dumping values:
+   - On Windows PowerShell:
+     ```powershell
+     Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" | Select-Object ProcessId, CommandLine
+     ```
+   - In Linux / containerized environments:
+     ```bash
+     cat /proc/$PID/environ | tr '\0' '\n' | cut -d= -f1 | grep -E 'DATABASE|DB_|POSTGRES|PG'
+     ```
+
+2. Check the local PostgreSQL TCP port:
 
    ```powershell
    Test-NetConnection -ComputerName 127.0.0.1 -Port 5432 -InformationLevel Quiet
@@ -22,7 +50,7 @@ Use `DatabaseConnectionFailure` as the incident label for connection refusal/DNS
 
    Healthy expected output: `True`. Failure expected output: warning that TCP connect to `127.0.0.1:5432` failed, then `False`.
 
-2. Check process liveness:
+3. Check process liveness:
 
    ```powershell
    curl.exe --silent --show-error --include --max-time 3 http://127.0.0.1:3000/health
@@ -30,7 +58,7 @@ Use `DatabaseConnectionFailure` as the incident label for connection refusal/DNS
 
    Healthy expected output includes `HTTP/1.1 200 OK` and `{"ok":true}`. If API is stopped/unreachable, curl reports connection failure and exits nonzero. A `200` is not a database health signal.
 
-3. Check dependency readiness:
+4. Check dependency readiness:
 
    ```powershell
    curl.exe --silent --show-error --include --max-time 3 http://127.0.0.1:3000/ready
@@ -38,7 +66,7 @@ Use `DatabaseConnectionFailure` as the incident label for connection refusal/DNS
 
    Healthy expected body: `{"status":"ready","checks":{"database":"up","redis":"up"}}` with HTTP `200`. A live API with a DB failure should return HTTP `503`, `status: not_ready`, and `checks.database: down`; messages are sanitized. If the API itself is not listening, curl fails without an HTTP status.
 
-4. If the API is running, inspect DB sessions through a read-only query. This uses the API directory `.env` without printing the connection URL; it emits only state/wait counts or a sanitized driver error code:
+5. If the API is running, inspect DB sessions through a read-only query. Pre-condition: Step 1 verified `has_DATABASE_URL: true`. This uses the API directory `.env` without printing the connection URL; it emits only state/wait counts or a sanitized driver error code:
 
    ```powershell
    node --input-type=module -e 'import "dotenv/config"; import pg from "pg"; const client = new pg.Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 2000, query_timeout: 2000 }); try { await client.connect(); const result = await client.query("SELECT state, wait_event_type, count(*)::int AS sessions FROM pg_stat_activity WHERE datname = current_database() GROUP BY state, wait_event_type ORDER BY state, wait_event_type"); console.log(JSON.stringify(result.rows)); } catch (error) { console.error(JSON.stringify({ error: error.code ?? "DATABASE_CHECK_FAILED" })); process.exitCode = 1; } finally { await client.end().catch(() => {}); }'
@@ -46,7 +74,7 @@ Use `DatabaseConnectionFailure` as the incident label for connection refusal/DNS
 
    Healthy expected output is JSON rows with session states/counts and exit 0. On refusal, expected output is a JSON error code such as `ECONNREFUSED` and nonzero exit; no connection URL is emitted. The configured `max: 10` is per Prisma client pool; total `pg_stat_activity` sessions can include the worker and other services, so do not infer pool exhaustion from the aggregate count alone. Run only in the trusted API workspace with its intended environment.
 
-5. Confirm the Docker engine is available before attempting a container action:
+6. Confirm the Docker engine is available before attempting a container action:
 
    ```powershell
    docker info
@@ -219,9 +247,12 @@ Healthy expected results: health responds under 0.5 seconds in an individual loc
 
 ### Database connection failure dry-run
 
-The dry-run used the observed local outage without stopping or changing any service. It exercised three diagnostic steps: TCP port probe, API liveness probe, and API readiness probe. It stopped before repair because the local Docker engine was unavailable and no service restart could be performed safely. This is a tested diagnostic walkthrough, not a successful recovery simulation; no live PostgreSQL/HTTP behavior is claimed.
+The dry-run used the observed local outage without stopping or changing any service. It exercised four diagnostic steps: environment key-name pre-flight probe, TCP port probe, API liveness probe, and API readiness probe. It stopped before repair because the local Docker engine was unavailable and no service restart could be performed safely. This is a tested diagnostic walkthrough, not a successful recovery simulation; no live PostgreSQL/HTTP behavior is claimed.
 
 ```text
+node --input-type=module -e "import 'dotenv/config'; const keys = Object.keys(process.env).filter(k => /(DATABASE|DB_|POSTGRES|PG)/i.test(k)).sort(); console.log(JSON.stringify({ cwd: process.cwd(), has_DATABASE_URL: Object.prototype.hasOwnProperty.call(process.env, 'DATABASE_URL') && Boolean(process.env.DATABASE_URL), matching_keys: keys }));"
+{"cwd":"D:\\KNACK SEKHAR LAB\\upsk-system-design-workspace\\api","has_DATABASE_URL":true,"matching_keys":["DATABASE_URL","MONGODB_URI","TEST_DATABASE_URL"]}
+
 Test-NetConnection -ComputerName 127.0.0.1 -Port 5432 -InformationLevel Quiet
 WARNING: TCP connect to (127.0.0.1 : 5432) failed
 False
