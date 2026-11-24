@@ -383,7 +383,7 @@ export class LinksService {
 
   async getRedirectTarget(
     code: string,
-    request: { ip?: string; headers: Record<string, string | string[] | undefined> },
+    request: { ip?: string; requestId?: string; headers: Record<string, string | string[] | undefined> },
   ): Promise<string> {
     if (!/^[A-Za-z0-9_-]{1,32}$/.test(code)) {
       throw new NotFoundException('Short link not found.');
@@ -409,7 +409,7 @@ export class LinksService {
     // 1. Cache-aside lookup (safe fallback: if Redis fails/unreachable, cachedUrl is null)
     let cachedUrl: string | null = null;
     try {
-      cachedUrl = await this.cacheService.getRedirectTarget(code);
+      cachedUrl = await this.cacheService.getRedirectTarget(code, request.requestId);
     } catch {
       cachedUrl = null;
     }
@@ -417,7 +417,7 @@ export class LinksService {
     if (cachedUrl) {
       let linkId: string | null = null;
       try {
-        linkId = await this.cacheService.getRedirectLinkId(code);
+        linkId = await this.cacheService.getRedirectLinkId(code, request.requestId);
       } catch {
         linkId = null;
       }
@@ -440,6 +440,7 @@ export class LinksService {
           userAgent,
           referrer,
           ipHash,
+          requestId: request.requestId,
         });
       }
       return cachedUrl;
@@ -479,6 +480,7 @@ export class LinksService {
       userAgent,
       referrer,
       ipHash,
+      requestId: request.requestId,
     });
 
     return link.longUrl;

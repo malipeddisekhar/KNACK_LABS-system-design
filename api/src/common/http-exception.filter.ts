@@ -9,6 +9,7 @@ import type { Request, Response } from 'express';
 import type { RequestWithId } from '../request-id.middleware.js';
 import { AppLogger } from './app-logger.service.js';
 import type { ErrorEnvelope } from './error-envelope.js';
+import { safeHttpMethod, safeRouteTemplate } from './http-route.js';
 
 /**
  * Global exception filter — catches every unhandled exception and writes a
@@ -17,12 +18,16 @@ import type { ErrorEnvelope } from './error-envelope.js';
  * Rules enforced here:
  *  - Stack traces are never sent to clients.
  *  - Secrets (auth headers, passwords) are never logged.
- *  - 5xx responses always use a generic client message; detail stays server-side.
+ *  - 5xx responses are generic; exception details and stacks are never serialized.
  *  - The request_id in the body always matches the X-Request-ID header.
  */
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  constructor(private readonly appLogger: AppLogger) {}
+  constructor(
+    private readonly appLogger: AppLogger,
+    private readonly environment: string = process.env.NODE_ENV ??
+      'development',
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -30,8 +35,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const res = ctx.getResponse<Response>();
 
     const requestId = req.requestId ?? 'unknown';
-    const start = (req as Request & { _startTime?: number })._startTime;
-    const latencyMs = start ? Date.now() - start : -1;
+    const route = safeRouteTemplate(
+      (req as Request & { route?: { path?: unknown } }).route?.path,
+    );
 
     let statusCode: number;
     let clientMessage: string;
@@ -54,36 +60,31 @@ export class HttpExceptionFilter implements ExceptionFilter {
           : exception.message;
 
       errorCode = httpStatusToCode(statusCode);
-      serverMessage = clientMessage;
+      if (statusCode >= 500) {
+        clientMessage = 'An unexpected error occurred. Please try again later.';
+        serverMessage = this.safeServerMessage(errorCode);
+      } else {
+        clientMessage = safeClientErrorMessage(clientMessage);
+        // Keep request data and exception detail out of logs in every mode.
+        serverMessage = errorCode;
+      }
     } else {
       // Unexpected / unhandled error — do NOT expose internals.
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
       errorCode = 'INTERNAL_SERVER_ERROR';
       clientMessage = 'An unexpected error occurred. Please try again later.';
-      serverMessage =
-        exception instanceof Error ? exception.message : String(exception);
+      serverMessage = this.safeServerMessage(errorCode);
     }
 
     // Log server-side context (no auth headers, no stack trace in the log line).
     this.appLogger.logError({
       request_id: requestId,
-      method: req.method,
-      route: req.path,
+      method: safeHttpMethod(req.method),
+      route,
       status_code: statusCode,
       error_code: errorCode,
       message: serverMessage,
     });
-
-    // For 5xx errors also log latency to aid incident debugging.
-    if (statusCode >= 500 && latencyMs >= 0) {
-      this.appLogger.logRequest({
-        request_id: requestId,
-        method: req.method,
-        route: req.path,
-        status_code: statusCode,
-        latency_ms: latencyMs,
-      });
-    }
 
     const body: ErrorEnvelope = {
       error: {
@@ -95,6 +96,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     res.status(statusCode).json(body);
   }
+
+  private safeServerMessage(errorCode: string): string {
+    return this.environment === 'production'
+      ? `${errorCode} (details redacted)`
+      : `${errorCode} (details withheld; stack not logged)`;
+  }
+}
+
+const SENSITIVE_CLIENT_DETAIL =
+  /(?:\b(?:password|passwd|pwd|secret|token|api[_-]?key|authorization|credential|database_url|jwt_secret)\b\s*[:=]|\bBearer\s+[A-Za-z0-9._~+/-]+|\b(?:postgres(?:ql)?|redis|rediss|mysql|mongodb(?:\+srv)?):\/\/[^\s"'<>]+|\b(?:ECONNREFUSED|ETIMEDOUT|ENOTFOUND|ECONNRESET|EHOSTUNREACH|PrismaClient\w+Error)\b|(?:^|\n)\s*at\s+[\w.$<>]+\s+\(|(?:^|\n)\s*Error(?::|\s)|\b(?:stack trace|caused by:)\b|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|\b[A-Z0-9_-]{8,}\.[A-Z0-9_-]{8,}\.[A-Z0-9_-]{8,}\b)/im;
+
+function safeClientErrorMessage(message: string): string {
+  return SENSITIVE_CLIENT_DETAIL.test(message)
+    ? 'Request could not be completed.'
+    : message;
 }
 
 /**

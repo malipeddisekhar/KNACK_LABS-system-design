@@ -13,7 +13,10 @@ export class RedirectController {
   @UseGuards(RateLimitGuard)
   @RateLimit(120)
   async redirect(@Param('code') code: string, @Req() request: Request) {
-    const url = await this.linksService.getRedirectTarget(code, request);
+    const url = await this.linksService.getRedirectTarget(
+      code,
+      request as Request & { requestId?: string },
+    );
     return { url, statusCode: 302 };
   }
 }

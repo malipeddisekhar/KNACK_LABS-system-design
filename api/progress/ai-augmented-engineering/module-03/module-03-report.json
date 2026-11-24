@@ -1,0 +1,99 @@
+{
+  "events": [
+    {
+      "module": 3,
+      "step": "reflect",
+      "event_type": "module_evaluation",
+      "data": {
+        "narrative": "The learner applied a layered context strategy to the Team Collaboration work and improved the context package after auditing three raw first-pass outputs. The revision makes shared response conventions, invitation expiry-versus-replay outcomes, and atomic activity sequencing explicit and testable. The raw first pass was preserved and the verification stayed within documentation; no runtime or regenerated-answer conformance is claimed.",
+        "overall": 5,
+        "dimension_scores": [
+          {
+            "key": "prompt_quality",
+            "score": 5,
+            "observation": "The learner translated broad conventions into explicit, task-specific context requirements and examples.",
+            "evidence": "system-context.md now provides an exact error-envelope and X-Request-ID assertion example; task-context-bundles.md enumerates status branches and concurrency invariants for all three tasks."
+          },
+          {
+            "key": "review_thoroughness",
+            "score": 5,
+            "observation": "The learner traced each divergence to shared source contracts and the relevant Prisma schema facts, then checked all three bundles against the revised requirements.",
+            "evidence": "context-fix-verification.md maps envelope, status, expiry-race, and activity-sequence gaps to their sources and records the context-package conformance pass."
+          },
+          {
+            "key": "iteration_efficiency",
+            "score": 5,
+            "observation": "The learner made focused edits to the context package and preserved the original raw first-pass evidence.",
+            "evidence": "Only system-context.md and task-context-bundles.md were tightened; raw-first-pass-outputs.md retained SHA-256 17A1277A613C62EF10B1A5783A66F383B9D8BB5127522D5239B189EF536B8F4D during the verification pass."
+          },
+          {
+            "key": "judgment",
+            "score": 5,
+            "observation": "The learner distinguished a repaired prompt package from proof that a new response or implementation conforms.",
+            "evidence": "The reflection and verification artifact explicitly state that the original raw outputs were not regenerated and no runtime behavior was tested or claimed."
+          },
+          {
+            "key": "final_quality",
+            "score": 5,
+            "observation": "The context package now gives reviewers concrete assertions for response shape, status mapping, lifecycle races, and event ordering.",
+            "evidence": "git diff --check exited 0; the whitespace scan passed for the three context documents; the report and reflection are saved under the Module 3 progress directory."
+          }
+        ],
+        "strengths": [
+          "Separated architectural, task-local, and constraint context while keeping the original first-pass output as immutable review evidence.",
+          "Converted error-envelope, request-ID, invitation-expiry, and activity-sequence conventions into explicit acceptance requirements.",
+          "Reported the scope and limits of the verification without claiming generated-output or runtime conformance."
+        ],
+        "growth_areas": [],
+        "recommendation": "For the next context package, add exact assertions and branch-specific status matrices when drafting each bundle, then review the generated output against those requirements before implementation.",
+        "student_knowledge": {
+          "terminology_gaps": [],
+          "concepts_demonstrated": [
+            {
+              "concept": "Layered context engineering",
+              "evidence": "The learner separated architectural, local, and constraint context and applied essential/optional/noise sorting to three task bundles."
+            },
+            {
+              "concept": "Executable response contracts",
+              "evidence": "The revised context requires exact error-envelope keys, stable status codes, and request-ID correlation assertions."
+            },
+            {
+              "concept": "Evidence boundaries",
+              "evidence": "The learner preserved the original raw outputs and labels the review as context-level verification rather than proof of a regenerated response or runtime implementation."
+            }
+          ],
+          "teaching_approaches": [
+            {
+              "concept": "Context contract review",
+              "approach": "example",
+              "detail": "Used a concrete Jest-style response assertion to make the shared error contract testable.",
+              "effective": true
+            },
+            {
+              "concept": "Progressive context refinement",
+              "approach": "guided_discovery",
+              "detail": "Compared first-pass outputs with source contracts, identified where context was under-specified, and tightened only the relevant context documents.",
+              "effective": true
+            }
+          ],
+          "effective_level": "intermediate",
+          "learning_style_signals": [
+            "Uses concrete examples, side-by-side comparisons, and command evidence to evaluate engineering claims."
+          ],
+          "confidence_level": "medium"
+        },
+        "public_evidence": [
+          {
+            "artifact": "Module 3 context package and verification record",
+            "student_action": "Refined shared and task-specific context to specify error responses, route status branches, invitation race behavior, and atomic activity sequence allocation.",
+            "technical_detail": "Updated the Module 3 system context and three task bundles; preserved the raw first-pass output for comparison.",
+            "proof": "git diff --check exited 0; the context-document whitespace scan passed; raw-first-pass-outputs.md retained its recorded SHA-256 during the pass.",
+            "ability": "Turns source conventions into explicit, reviewable AI task constraints.",
+            "reviewer_value": "Shows how context quality can be improved while preserving evidence boundaries and avoiding unsupported implementation claims.",
+            "confidence": "demonstrated"
+          }
+        ]
+      }
+    }
+  ]
+}

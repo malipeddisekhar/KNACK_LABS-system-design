@@ -1,103 +1,29 @@
-# ==============================================================================
-# Multi-Stage Production Dockerfile for URL Shortener API & Background Worker
-# ==============================================================================
+# Build with the complete toolchain, then prune development dependencies.
+FROM node:20-slim AS builder
+WORKDIR /app
 
-# ------------------------------------------------------------------------------
-# Stage 1: Production Dependencies
-# ------------------------------------------------------------------------------
-FROM node:22-bookworm-slim AS dependencies
-
-WORKDIR /usr/src/app
-
-# Install OpenSSL and CA certificates for Prisma TLS engine support
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    openssl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy package manifests for reproducible dependency installation
-COPY package*.json ./
-
-# Install production dependencies only using the locked package-lock.json
-RUN npm ci --omit=dev
-
-# Install prisma CLI and dotenv in the dependencies layer so migrations can run
-# as a standalone one-off job without devDependencies (e.g. jest, typescript)
-RUN npm install --no-save prisma@7.10.1 dotenv@18.0.9
-
-# ------------------------------------------------------------------------------
-# Stage 2: Build Application & Generate Prisma Client
-# ------------------------------------------------------------------------------
-FROM node:22-bookworm-slim AS builder
-
-WORKDIR /usr/src/app
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    openssl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy package manifests
-COPY package*.json ./
-
-# Install all dependencies (including devDependencies needed for compilation)
+COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy Prisma schema and Prisma 7 configuration
-COPY prisma7.config.ts ./
-COPY prisma ./prisma/
+COPY . .
+RUN npm run build --if-present
+RUN npm prune --omit=dev
 
-# Generate the Prisma 7 client into src/generated/prisma
-# Note: Prisma client code generation analyzes schema.prisma without requiring a live database connection.
-# A non-secret build-only placeholder satisfies Prisma 7 env('DATABASE_URL') validation during the Docker build.
-RUN DATABASE_URL="postgresql://build-only-dummy:build-only-dummy@127.0.0.1:5432/build_only_dummy?schema=public" npx prisma generate
-
-# Copy application source code and TypeScript build configs
-COPY tsconfig*.json nest-cli.json ./
-COPY src ./src/
-
-# Compile NestJS application into dist/ (including dist/generated/prisma)
-RUN npm run build
-
-# ------------------------------------------------------------------------------
-# Stage 3: Production Runtime
-# ------------------------------------------------------------------------------
-FROM node:22-bookworm-slim AS runner
-
-WORKDIR /usr/src/app
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    openssl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Runtime environment settings
+# Runtime image contains only production dependencies and compiled output.
+FROM node:20-slim AS runtime
+WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Put node_modules bin on PATH so `prisma` CLI can be executed directly
-ENV PATH="/usr/src/app/node_modules/.bin:$PATH"
+RUN apt-get update     && apt-get install -y --no-install-recommends curl ca-certificates openssl     && rm -rf /var/lib/apt/lists/*     && groupadd --system appgroup     && useradd --system --gid appgroup --create-home appuser
 
-# Copy production node_modules from dependencies stage
-COPY --chown=node:node --from=dependencies /usr/src/app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
+COPY --from=builder --chown=appuser:appgroup /app/package.json ./package.json
 
-# Copy package.json to enable `npm run start:prod` and `npm run worker`
-COPY --chown=node:node package.json ./
-
-# Copy compiled JavaScript output from builder stage
-COPY --chown=node:node --from=builder /usr/src/app/dist ./dist
-
-# Copy Prisma configuration and migrations for the one-off migration job
-COPY --chown=node:node prisma7.config.ts ./
-COPY --chown=node:node prisma ./prisma/
-
-# Run as non-root user
-USER node
-
-# Expose default HTTP port
 EXPOSE 3000
+# The API currently registers GET /health (not /live).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -f http://localhost:${PORT:-3000}/health || exit 1
 
-# Default command: run the API service
-# To run worker: override command with ["node", "dist/worker.js"]
-# To run migrations: override command with ["prisma", "migrate", "deploy"]
+USER appuser
 CMD ["node", "dist/main.js"]

@@ -1,41 +1,73 @@
-# Dependencies and build outputs
-node_modules
-dist
-
-# Environment variables and secrets
-.env
-.env.*
-*.env
-*.local
-
-# Tests and coverage
-test
-tests
-coverage
-src/**/*.spec.ts
-src/**/*.test.ts
-jest*.json
-
-# Version control and editor
+# Version control and generated metadata
 .git
 .gitignore
-.vscode
-.idea
 
-# Tooling and linters
-.oxlintrc.json
-eslint*
-prettier*
+# Dependencies and build products
+node_modules
+**/node_modules
+dist
+**/dist
+build
+**/build
+coverage
+**/coverage
+.nyc_output
+test-results
+playwright-report
+*.tsbuildinfo
+*.map
 
-# Logs and scratch
+# Environment files and local credentials; retain only the safe root template
+.env*
+**/.env*
+!.env.example
+!**/.env.example
+*.env
+*.local
+.npmrc
+**/.npmrc
+.aws
+**/.aws
+.ssh
+**/.ssh
+secrets
+**/secrets/
+.secrets
+**/.secrets/
+credentials
+**/credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Test files and fixtures
+test
+tests
+**/__tests__/
+**/*.spec.ts
+**/*.test.ts
+
+# Build, package-manager, and tool caches
+.cache
+**/.cache
+.npm
+.pnpm-store
+.turbo
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
-scratch
+pnpm-debug.log*
 progress
+**/progress
 
-# Documentation and OS files
-README.md
+# Documentation and operating-system/editor artifacts
+*.md
+**/*.md
 .DS_Store
+**/.DS_Store
 Thumbs.db
+**/Thumbs.db
+Desktop.ini
+.vscode
+.idea

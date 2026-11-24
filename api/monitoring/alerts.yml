@@ -1,0 +1,58 @@
+groups:
+  - name: url-shortener-api
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="url-shortener-api",status=~"5.."}[5m]))
+            / clamp_min(sum(rate(http_requests_total{job="url-shortener-api"}[5m])), 0.001)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: API 5xx rate is above 5%
+          description: More than 5% of completed API requests returned 5xx for five minutes.
+          runbook_url: progress/production-readiness/module-04/observability-build-notes.md#high-error-rate
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (job, method, path, le) (
+              rate(http_request_duration_seconds_bucket{job="url-shortener-api"}[5m])
+            )
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warn
+        annotations:
+          summary: API p95 latency is above 500 ms for {{ $labels.method }} {{ $labels.path }}
+          description: The five-minute p95 duration for this API route exceeded 500 ms for ten minutes.
+          runbook_url: progress/production-readiness/module-04/observability-build-notes.md#high-latency
+      - alert: ServiceDown
+        expr: up{job="url-shortener-api"} == 0
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: API Prometheus target is down
+          description: Prometheus has failed to scrape the url-shortener-api target for one minute.
+          runbook_url: progress/production-readiness/module-04/observability-build-notes.md#service-down
+      - alert: ServiceTargetMissing
+        expr: absent(up{job="url-shortener-api"})
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: API target is missing from Prometheus
+          description: No scrape target with job url-shortener-api is present; this detects target removal or job-label drift, but not a Prometheus server outage.
+          runbook_url: progress/production-readiness/module-04/observability-build-notes.md#service-down
+      - alert: MetricLabelOverflow
+        expr: increase(http_requests_overflow_total{job="url-shortener-api"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: warn
+        annotations:
+          summary: API metric label series are overflowing the configured cap
+          description: Request metric series were folded into the overflow bucket; per-status and per-route detail may be incomplete.
+          runbook_url: progress/production-readiness/module-04/observability-build-notes.md#high-error-rate

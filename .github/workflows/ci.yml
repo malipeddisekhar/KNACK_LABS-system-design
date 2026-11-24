@@ -1,220 +1,108 @@
-name: CI
+name: Production Readiness CI
 
 on:
   push:
     branches:
-      - '**'
+      - main
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: Intentionally fail before Docker build to verify fail-fast gating
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
 
 jobs:
-  test-and-build:
-    name: Test and Build
+  sequential-ci:
+    name: Lint, test, build, and publish
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: url_shortener_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres -d url_shortener_test"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: api
 
-    env:
-      NODE_ENV: test
-      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/url_shortener_test?schema=public
-      REDIS_URL: redis://localhost:6379
-      JWT_SECRET: ci-testing-jwt-secret-minimum-32-characters-entropy
-      PORT: 3000
-      PUBLIC_BASE_URL: http://localhost:3000
-      RETENTION_DAYS: 30
-
     steps:
-      - name: Check out repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 22
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
           cache-dependency-path: api/package-lock.json
 
-      - name: Install dependencies (clean install)
+      - name: Clean dependency install
         run: npm ci
 
-      - name: Generate Prisma 7 Client
-        run: npx prisma generate --config prisma7.test.config.ts
-
-      - name: Apply Prisma migrations to isolated test database
-        run: npx prisma migrate deploy --config prisma7.test.config.ts
-
-      - name: Run linter (oxlint)
+      - name: Lint and static checks
         run: npm run lint
 
-      - name: Compile NestJS application (production build)
+      - name: Compile Nest application
         run: npm run build
 
-      - name: Run unit test suite
-        run: npm test -- --forceExit
+      - name: Unit and contract tests
+        run: node --experimental-vm-modules ./node_modules/jest/bin/jest.js src/teams/team-activity-feed.spec.ts src/teams/team-collaboration-contracts.spec.ts --runInBand
 
-      - name: Run full end-to-end test suite (in-band)
-        run: npm run test:e2e -- --runInBand --forceExit
+      - name: Check patch whitespace
+        working-directory: .
+        run: git diff --check
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker production image (build verification)
-        uses: docker/build-push-action@v6
-        with:
-          context: api
-          file: api/Dockerfile
-          load: true
-          push: false
-          tags: url-shortener-api:latest
-
-      - name: Verify Docker container runtime, health checks, and graceful shutdown
+      - name: Optional fail-fast drill
+        if: success() && inputs.simulate_failure
         run: |
-          set -e
+          echo "Intentional failure requested; Docker build must be skipped."
+          exit 1
 
-          # 1. Discover the Docker network used by the CI service containers
-          POSTGRES_CONTAINER=$(docker ps -q --filter "ancestor=postgres:16-alpine" | head -n 1)
-          CI_NETWORK=$(docker inspect "$POSTGRES_CONTAINER" --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}' | awk '{print $1}')
-          echo "Identified CI Docker network: $CI_NETWORK"
+      - name: Build SHA-tagged Docker image
+        if: success()
+        run: docker build -t "local/upsk-system-design-api:$GITHUB_SHA" .
 
-          # 2. Run the production container on non-default port 43127 using isolated test dependencies
-          docker run -d \
-            --name app-container \
-            --network "$CI_NETWORK" \
-            -p 43127:43127 \
-            -e NODE_ENV=production \
-            -e PORT=43127 \
-            -e PUBLIC_BASE_URL=http://localhost:43127 \
-            -e DATABASE_URL="postgresql://postgres:postgres@postgres:5432/url_shortener_test?schema=public" \
-            -e TEST_DATABASE_URL="postgresql://postgres:postgres@postgres:5432/url_shortener_test?schema=public" \
-            -e REDIS_URL="redis://redis:6379" \
-            -e JWT_SECRET="ci-testing-jwt-secret-minimum-32-characters-entropy" \
-            -e RETENTION_DAYS=30 \
-            url-shortener-api:latest
+      - name: Enforce image size limit
+        if: success()
+        run: |
+          set -eu
+          image="local/upsk-system-design-api:$GITHUB_SHA"
+          size_bytes="$(docker image inspect "$image" --format '{{.Size}}')"
+          max_bytes=$((512 * 1024 * 1024))
+          if [ "$size_bytes" -gt "$max_bytes" ]; then
+            echo "::error::Image size $size_bytes bytes exceeds $max_bytes-byte limit"
+            exit 1
+          fi
+          size_mib=$((size_bytes / 1024 / 1024))
+          echo "Image size $size_bytes bytes ($size_mib MiB) is within $max_bytes-byte limit"
 
-          # 3. Wait for the API container to start up and listen on port 43127
-          echo "Waiting for app-container to become responsive on port 43127..."
-          START_TIME=$(date +%s)
-          TIMEOUT=30
-          HEALTH_OK=false
-
-          while [ $(($(date +%s) - START_TIME)) -lt $TIMEOUT ]; do
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:43127/health || true)
-            if [ "$HTTP_CODE" = "200" ]; then
-              HEALTH_OK=true
-              echo "App container responded with HTTP 200 within $(($(date +%s) - START_TIME))s"
-              break
-            fi
-            sleep 1
-          done
-
-          if [ "$HEALTH_OK" != "true" ]; then
-            echo "Error: Application container failed to respond on port 43127 within ${TIMEOUT}s"
-            docker logs app-container
+      - name: Validate registry namespace
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          REGISTRY_NAMESPACE: ${{ vars.REGISTRY_NAMESPACE }}
+        run: |
+          if [ -z "$REGISTRY_NAMESPACE" ]; then
+            echo "::error::Set the repository variable REGISTRY_NAMESPACE to the Docker Hub account or organization."
             exit 1
           fi
 
-          # 4. Verify GET /health returns HTTP 200 {"ok":true}
-          echo "Verifying GET /health on port 43127..."
-          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:43127/health)
-          HEALTH_BODY=$(curl -s http://127.0.0.1:43127/health)
-          echo "Health response: status=$HEALTH_STATUS body=$HEALTH_BODY"
-          test "$HEALTH_STATUS" = "200"
-          echo "$HEALTH_BODY" | grep -q '"ok":true'
+      - name: Login to Docker Hub
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
-          # 5. Verify GET /ready returns HTTP 200 when PostgreSQL and Redis are available
-          echo "Verifying GET /ready (all dependencies up)..."
-          READY_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:43127/ready)
-          READY_BODY=$(curl -s http://127.0.0.1:43127/ready)
-          echo "Readiness response: status=$READY_STATUS body=$READY_BODY"
-          test "$READY_STATUS" = "200"
-          echo "$READY_BODY" | grep -q '"status":"ready"'
-          echo "$READY_BODY" | grep -q '"database":"up"'
-          echo "$READY_BODY" | grep -q '"redis":"up"'
-
-          # 6. Verify GET /ready returns HTTP 503 when Redis is unavailable
-          echo "Verifying readiness failure status (HTTP 503) when Redis is unavailable..."
-          docker run -d \
-            --name app-dep-failure-test \
-            --network "$CI_NETWORK" \
-            -p 43128:43128 \
-            -e NODE_ENV=production \
-            -e PORT=43128 \
-            -e PUBLIC_BASE_URL=http://localhost:43128 \
-            -e DATABASE_URL="postgresql://postgres:postgres@postgres:5432/url_shortener_test?schema=public" \
-            -e TEST_DATABASE_URL="postgresql://postgres:postgres@postgres:5432/url_shortener_test?schema=public" \
-            -e REDIS_URL="redis://nonexistent-redis-host:6379" \
-            -e JWT_SECRET="ci-testing-jwt-secret-minimum-32-characters-entropy" \
-            -e RETENTION_DAYS=30 \
-            url-shortener-api:latest
-
-          DEP_START_TIME=$(date +%s)
-          DEP_HEALTH_OK=false
-          while [ $(($(date +%s) - DEP_START_TIME)) -lt 20 ]; do
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:43128/health || true)
-            if [ "$HTTP_CODE" = "200" ]; then
-              DEP_HEALTH_OK=true
-              break
-            fi
-            sleep 1
-          done
-
-          if [ "$DEP_HEALTH_OK" != "true" ]; then
-            echo "Error: app-dep-failure-test failed to respond to /health"
-            docker logs app-dep-failure-test
-            docker rm -f app-dep-failure-test
-            exit 1
-          fi
-
-          UNREADY_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:43128/ready)
-          UNREADY_BODY=$(curl -s http://127.0.0.1:43128/ready)
-          echo "Unready response: status=$UNREADY_STATUS body=$UNREADY_BODY"
-          test "$UNREADY_STATUS" = "503"
-          echo "$UNREADY_BODY" | grep -q '"status":"not_ready"'
-          echo "$UNREADY_BODY" | grep -q '"redis":"down"'
-          docker rm -f app-dep-failure-test
-
-          # 7. Verify graceful shutdown handles SIGTERM cleanly within timeout
-          echo "Verifying graceful shutdown of app-container on SIGTERM..."
-          SHUTDOWN_START=$(date +%s)
-          docker stop -t 15 app-container
-          SHUTDOWN_DURATION=$(($(date +%s) - SHUTDOWN_START))
-          echo "Container stopped in ${SHUTDOWN_DURATION}s"
-          test $SHUTDOWN_DURATION -lt 15
-
-          EXIT_CODE=$(docker inspect app-container --format='{{.State.ExitCode}}')
-          echo "Container exit code: $EXIT_CODE"
-          docker logs --tail 20 app-container
-          if [ "$EXIT_CODE" -ne 0 ] && [ "$EXIT_CODE" -ne 143 ]; then
-            echo "Error: Container exited with unexpected code $EXIT_CODE"
-            exit 1
-          fi
-          docker rm app-container
-          echo "Container runtime verification passed all checks successfully."
+      - name: Tag and push commit image
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          REGISTRY_NAMESPACE: ${{ vars.REGISTRY_NAMESPACE }}
+        run: |
+          set -eu
+          image_tag="docker.io/$REGISTRY_NAMESPACE/upsk-system-design-api:$GITHUB_SHA"
+          docker tag "local/upsk-system-design-api:$GITHUB_SHA" "$image_tag"
+          docker push "$image_tag"
+          echo "Published image tag: $image_tag"

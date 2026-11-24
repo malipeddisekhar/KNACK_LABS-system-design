@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import type { Job } from 'bullmq';
+import { UnrecoverableError, type Job } from 'bullmq';
 import { PrismaService } from '../database/prisma.service.js';
 import {
   ANALYTICS_QUEUE,
@@ -8,6 +8,7 @@ import {
   PURGE_EXPIRED_JOB,
 } from './analytics.constants.js';
 import type { ClickEventJobData } from './analytics.types.js';
+import { isTransientDatabaseError } from '../common/resilience.js';
 
 @Processor(ANALYTICS_QUEUE)
 @Injectable()
@@ -77,11 +78,13 @@ export class AnalyticsProcessor extends WorkerHost implements OnModuleDestroy {
         return;
       }
 
-      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        `[AnalyticsWorker] Failed to persist click event (eventId=${eventId}): ${message}`,
+        '[AnalyticsWorker] Failed to persist click event; details withheld.',
       );
-      throw error; // Re-throw to trigger BullMQ retry backoff
+      if (isTransientDatabaseError(error)) {
+        throw new Error('Transient analytics persistence failure.');
+      }
+      throw new UnrecoverableError('Non-retryable analytics persistence failure.');
     }
   }
 

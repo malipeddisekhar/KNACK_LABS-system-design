@@ -6,6 +6,7 @@ import {
   DEFAULT_RETENTION_DAYS,
 } from './analytics.constants.js';
 import type { ClickEventJobData } from './analytics.types.js';
+import { UnrecoverableError } from 'bullmq';
 
 describe('AnalyticsService and AnalyticsProcessor (unit)', () => {
   let analyticsService: AnalyticsService;
@@ -13,6 +14,7 @@ describe('AnalyticsService and AnalyticsProcessor (unit)', () => {
   let mockQueue: { name: string; add: jest.Mock; close: jest.Mock };
   let mockPrisma: { clickEvent: { create: jest.Mock; deleteMany: jest.Mock } };
   let mockConfig: { get: jest.Mock };
+  let mockAppLogger: { logDependencyRetry: jest.Mock; logDependencyTimeout: jest.Mock };
 
   beforeEach(() => {
     mockQueue = {
@@ -31,11 +33,16 @@ describe('AnalyticsService and AnalyticsProcessor (unit)', () => {
     mockConfig = {
       get: jest.fn().mockReturnValue('30'),
     };
+    mockAppLogger = {
+      logDependencyRetry: jest.fn(),
+      logDependencyTimeout: jest.fn(),
+    };
 
     analyticsService = new AnalyticsService(
       mockQueue as any,
       mockPrisma as any,
       mockConfig as any,
+      mockAppLogger as any,
     );
 
     analyticsProcessor = new AnalyticsProcessor(mockPrisma as any);
@@ -79,8 +86,38 @@ describe('AnalyticsService and AnalyticsProcessor (unit)', () => {
       expect(jobOptions.attempts).toBe(3);
       expect(jobOptions.backoff).toEqual({
         type: 'exponential',
-        delay: 1000,
+        delay: 500,
+        jitter: 0.5,
       });
+    });
+
+    it('retries one transient queue error with bounded jitter and structured metadata', async () => {
+      jest.useFakeTimers();
+      try {
+        mockQueue.add
+          .mockRejectedValueOnce(Object.assign(new Error('private redis detail'), { code: 'ETIMEDOUT' }))
+          .mockResolvedValueOnce({ id: 'job-retried' });
+        const pending = analyticsService.recordClick({
+          linkId: 'retry-link',
+          ipHash: 'hash',
+          requestId: 'req-123',
+        });
+        await jest.advanceTimersByTimeAsync(100);
+        await expect(pending).resolves.toMatchObject({ eventId: expect.any(String) });
+        expect(mockQueue.add).toHaveBeenCalledTimes(2);
+        expect(mockPrisma.clickEvent.create).not.toHaveBeenCalled();
+        expect(mockAppLogger.logDependencyRetry).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dependency: 'redis',
+            operation: 'analytics_enqueue',
+            attempt: 1,
+            error_code: 'ETIMEDOUT',
+            request_id: 'req-123',
+          }),
+        );
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('executes durable database fallback when queue is unavailable', async () => {
@@ -159,8 +196,8 @@ describe('AnalyticsService and AnalyticsProcessor (unit)', () => {
       await expect(analyticsProcessor.process(mockJob)).resolves.not.toThrow();
     });
 
-    it('re-throws unexpected database errors to trigger BullMQ retries', async () => {
-      const dbError = new Error('Database connection lost');
+    it('rethrows transient database errors with sanitized metadata for bounded BullMQ retry', async () => {
+      const dbError = Object.assign(new Error('postgres://private connection'), { code: 'P1001' });
       mockPrisma.clickEvent.create.mockRejectedValueOnce(dbError);
 
       const jobData: ClickEventJobData = {
@@ -178,8 +215,25 @@ describe('AnalyticsService and AnalyticsProcessor (unit)', () => {
       } as any;
 
       await expect(analyticsProcessor.process(mockJob)).rejects.toThrow(
-        'Database connection lost',
+        'Transient analytics persistence failure.',
       );
+    });
+
+    it('marks permanent database errors unrecoverable instead of retrying them', async () => {
+      mockPrisma.clickEvent.create.mockRejectedValueOnce(
+        Object.assign(new Error('constraint data'), { code: 'P2004' }),
+      );
+      await expect(
+        analyticsProcessor.process({
+          name: 'record-click',
+          data: {
+            eventId: 'permanent-event',
+            linkId: 'link-uuid-1',
+            clickedAt: new Date().toISOString(),
+            ipHash: 'hash',
+          },
+        } as any),
+      ).rejects.toBeInstanceOf(UnrecoverableError);
     });
   });
 

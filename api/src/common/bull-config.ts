@@ -8,6 +8,7 @@ export function createBullConnectionConfig(config: ConfigService) {
         host: '127.0.0.1',
         port: 6379,
         maxRetriesPerRequest: null,
+        connectTimeout: 2000,
       },
     };
   }
@@ -20,7 +21,7 @@ export function createBullConnectionConfig(config: ConfigService) {
         password: url.password ? decodeURIComponent(url.password) : undefined,
         tls: url.protocol === 'rediss:' ? {} : undefined,
         maxRetriesPerRequest: null,
-        connectTimeout: 5000,
+        connectTimeout: 2000,
         lazyConnect: true,
       },
     };

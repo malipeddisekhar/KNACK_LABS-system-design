@@ -3,17 +3,61 @@ import {
   Logger,
   OnModuleDestroy,
   OnModuleInit,
+  Optional,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import { AppLogger } from '../common/app-logger.service.js';
+import {
+  CircuitBreaker,
+  CircuitOpenError,
+  DependencyTimeoutError,
+} from '../common/resilience.js';
+
+const REDIS_RECONNECT_RETRY_LIMIT = 3;
+const REDIS_RECONNECT_MAX_DELAY_MS = 1000;
+
+export function redisReconnectDelay(
+  retryCount: number,
+  random: () => number = Math.random,
+): number | null {
+  if (!Number.isInteger(retryCount) || retryCount < 1 || retryCount > REDIS_RECONNECT_RETRY_LIMIT) {
+    return null;
+  }
+  const ceiling = Math.min(
+    200 * 2 ** (retryCount - 1),
+    REDIS_RECONNECT_MAX_DELAY_MS,
+  );
+  const sample = random();
+  const boundedSample = Number.isFinite(sample)
+    ? Math.min(Math.max(sample, 0), 0.9999999999)
+    : 0.5;
+  return Math.floor(boundedSample * ceiling);
+}
 
 @Injectable()
 export class CacheService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger('CacheService');
   private redis: Redis | null = null;
   private readonly defaultTtl = 300; // 5 minutes default TTL
+  private readonly redirectReadBreaker: CircuitBreaker;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    @Optional() private readonly appLogger?: AppLogger,
+  ) {
+    this.redirectReadBreaker = new CircuitBreaker({
+      failureThreshold: 3,
+      resetTimeoutMs: 5000,
+      onStateChange: (from, to) =>
+        this.appLogger?.logCircuitState({
+          dependency: 'redis',
+          operation: 'redirect_cache_read',
+          from_state: from,
+          to_state: to,
+        }),
+    });
+  }
 
   onModuleInit(): void {
     const redisUrl = this.configService.get<string>('REDIS_URL')?.trim();
@@ -28,29 +72,24 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
       this.redis = new Redis(redisUrl, {
         lazyConnect: true,
         maxRetriesPerRequest: 1,
-        connectTimeout: 3000,
-        retryStrategy: (times) => {
-          if (times > 3) {
-            return null; // Stop retrying after 3 attempts so operations do not hang
-          }
-          return Math.min(times * 200, 1000);
-        },
+        connectTimeout: 1500,
+        commandTimeout: 1000,
+        retryStrategy: (times) => redisReconnectDelay(times),
       });
 
       this.redis.on('connect', () => {
         this.logger.log('Redis client connected.');
       });
 
-      this.redis.on('error', (err) => {
-        this.logger.warn(`Redis error: ${err.message}`);
+      this.redis.on('error', () => {
+        this.logger.warn('Redis client error; details withheld.');
       });
 
-      this.redis.connect().catch((err) => {
-        this.logger.warn(`Initial Redis connection failed: ${err.message}`);
+      this.redis.connect().catch(() => {
+        this.logger.warn('Initial Redis connection failed; details withheld.');
       });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      this.logger.warn(`Failed to initialize Redis client: ${message}`);
+    } catch {
+      this.logger.warn('Failed to initialize Redis client; details withheld.');
       this.redis = null;
     }
   }
@@ -69,22 +108,23 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
    * Retrieves the cached redirect target URL for a given short code.
    * Returns null on cache miss or if Redis is unreachable (graceful fallback).
    */
-  async getRedirectTarget(code: string): Promise<string | null> {
+  async getRedirectTarget(code: string, requestId?: string): Promise<string | null> {
     if (!this.redis) {
       return null;
     }
 
     try {
-      const url = await this.redis.get(`redirect:${code}`);
+      const url = await this.redirectReadBreaker.execute(() =>
+        this.redis!.get(`redirect:${code}`),
+      );
       if (url) {
         this.logger.log(`[Cache Hit] code=${code}`);
         return url;
       }
       this.logger.log(`[Cache Miss] code=${code}`);
       return null;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      this.logger.warn(`Cache get failed for code=${code}: ${message}`);
+    } catch (error) {
+      this.logReadFallback('redirect_cache_get', error, requestId);
       return null;
     }
   }
@@ -114,23 +154,26 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
         await this.redis.set(`redirect:${code}`, url, 'EX', ttl);
       }
       this.logger.log(`[Cache Set] code=${code} ttl=${ttl}s`);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      this.logger.warn(`Cache set failed for code=${code}: ${message}`);
+    } catch (error) {
+      this.logReadFallback('redirect_cache_set', error);
+      this.logger.warn('Cache set failed; details withheld.');
     }
   }
 
   /**
    * Retrieves the cached link ID for analytics recording on cache hits.
    */
-  async getRedirectLinkId(code: string): Promise<string | null> {
+  async getRedirectLinkId(code: string, requestId?: string): Promise<string | null> {
     if (!this.redis) {
       return null;
     }
 
     try {
-      return await this.redis.get(`redirect_id:${code}`);
-    } catch {
+      return await this.redirectReadBreaker.execute(() =>
+        this.redis!.get(`redirect_id:${code}`),
+      );
+    } catch (error) {
+      this.logReadFallback('redirect_id_get', error, requestId);
       return null;
     }
   }
@@ -146,9 +189,9 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.redis.del(`redirect:${code}`, `redirect_id:${code}`);
       this.logger.log(`[Cache Invalidate] code=${code}`);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      this.logger.warn(`Cache invalidate failed for code=${code}: ${message}`);
+    } catch (error) {
+      this.logReadFallback('redirect_cache_invalidate', error);
+      this.logger.warn('Cache invalidation failed; details withheld.');
     }
   }
 
@@ -162,9 +205,32 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     try {
       const pong = await this.redis.ping();
       return pong === 'PONG';
-    } catch {
+    } catch (error) {
+      this.logReadFallback('readiness_ping', error);
       return false;
     }
   }
+
+  private logReadFallback(operation: string, error: unknown, requestId?: string): void {
+    if (error instanceof CircuitOpenError) return;
+    if (isRedisCommandTimeout(error) || error instanceof DependencyTimeoutError) {
+      this.appLogger?.logDependencyTimeout({
+        dependency: 'redis',
+        operation,
+        timeout_ms:
+          error instanceof DependencyTimeoutError ? error.timeoutMs : 1000,
+        request_id: requestId,
+      });
+      return;
+    }
+    this.appLogger?.warnDependencyFailure({
+      dependency: 'redis',
+      operation,
+      request_id: requestId,
+    });
+  }
 }
 
+function isRedisCommandTimeout(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Command timed out';
+}

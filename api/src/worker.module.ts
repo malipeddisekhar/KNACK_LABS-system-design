@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { DatabaseModule } from './database/database.module.js';
+import { CommonModule } from './common/common.module.js';
 import { ANALYTICS_QUEUE } from './analytics/analytics.constants.js';
 import { AnalyticsProcessor } from './analytics/analytics.processor.js';
 import { createBullConnectionConfig } from './common/bull-config.js';
@@ -11,6 +12,7 @@ import { createBullConnectionConfig } from './common/bull-config.js';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    CommonModule,
     DatabaseModule,
     BullModule.forRootAsync({
       inject: [ConfigService],

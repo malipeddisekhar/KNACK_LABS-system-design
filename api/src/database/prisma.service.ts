@@ -55,8 +55,11 @@ export class PrismaService
     const connectionString = resolveDatabaseConnectionString(configService);
     const adapter = new PrismaPg({
       connectionString,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 2000,
       idleTimeoutMillis: 30000,
+      max: 10,
+      statement_timeout: 3000,
+      query_timeout: 3500,
     });
 
     super({ adapter });

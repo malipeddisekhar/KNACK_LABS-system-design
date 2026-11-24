@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, Optional } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { randomUUID } from 'node:crypto';
@@ -10,6 +10,15 @@ import {
   DEFAULT_RETENTION_DAYS,
 } from './analytics.constants.js';
 import type { ClickEventJobData } from './analytics.types.js';
+import { AppLogger } from '../common/app-logger.service.js';
+import {
+  DependencyTimeoutError,
+  retryTransient,
+  withDependencyTimeout,
+} from '../common/resilience.js';
+
+const ENQUEUE_TIMEOUT_MS = 500;
+const FALLBACK_WRITE_TIMEOUT_MS = 750;
 
 @Injectable()
 export class AnalyticsService implements OnModuleDestroy {
@@ -19,6 +28,7 @@ export class AnalyticsService implements OnModuleDestroy {
     @InjectQueue(ANALYTICS_QUEUE) private readonly analyticsQueue: Queue,
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    @Optional() private readonly appLogger?: AppLogger,
   ) {}
 
   async onModuleDestroy(): Promise<void> {
@@ -39,6 +49,7 @@ export class AnalyticsService implements OnModuleDestroy {
     userAgent?: string;
     referrer?: string;
     ipHash: string;
+    requestId?: string;
   }): Promise<{ eventId: string }> {
     const eventId = randomUUID();
     const clickedAt = new Date().toISOString();
@@ -52,51 +63,83 @@ export class AnalyticsService implements OnModuleDestroy {
     };
 
     try {
-      const enqueuePromise = this.analyticsQueue.add(CLICK_EVENT_JOB, jobData, {
-        jobId: eventId,
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 1000,
-        },
-        removeOnComplete: true,
-        removeOnFail: false,
-      });
-
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Queue enqueue timed out')), 2000);
-      });
-
-      await Promise.race([enqueuePromise, timeoutPromise]);
+      await withDependencyTimeout(
+        () =>
+          retryTransient(
+            () =>
+              this.analyticsQueue.add(CLICK_EVENT_JOB, jobData, {
+                jobId: eventId,
+                attempts: 3,
+                backoff: { type: 'exponential', delay: 500, jitter: 0.5 },
+                removeOnComplete: true,
+                removeOnFail: false,
+              }),
+            {
+              maxRetries: 1,
+              initialDelayMs: 40,
+              maxDelayMs: 100,
+              onRetry: (attempt, delayMs, errorCode) =>
+                this.appLogger?.logDependencyRetry({
+                  dependency: 'redis',
+                  operation: 'analytics_enqueue',
+                  attempt,
+                  delay_ms: delayMs,
+                  error_code: errorCode,
+                  request_id: params.requestId,
+                }),
+            },
+          ),
+        'redis',
+        'analytics_enqueue',
+        ENQUEUE_TIMEOUT_MS,
+      );
       this.logger.log(
         `[Analytics] Enqueued click job: eventId=${eventId} linkId=${params.linkId}`,
       );
-    } catch (queueErr) {
-      const message =
-        queueErr instanceof Error ? queueErr.message : String(queueErr);
+    } catch (error) {
+      if (error instanceof DependencyTimeoutError) {
+        this.appLogger?.logDependencyTimeout({
+          dependency: error.dependency,
+          operation: error.operation,
+          timeout_ms: error.timeoutMs,
+          request_id: params.requestId,
+        });
+      }
       this.logger.warn(
-        `[Analytics] Queue unavailable (${message}). Applying durable fallback to database.`,
+        '[Analytics] Queue unavailable; applying durable database fallback (details withheld).',
       );
 
       try {
-        await this.prisma.clickEvent.create({
-          data: {
-            eventId,
-            linkId: params.linkId,
-            clickedAt: new Date(clickedAt),
-            userAgent: params.userAgent ?? '',
-            referrer: params.referrer ?? '',
-            ipHash: params.ipHash,
-          },
-        });
+        await withDependencyTimeout(
+          () =>
+            this.prisma.clickEvent.create({
+              data: {
+                eventId,
+                linkId: params.linkId,
+                clickedAt: new Date(clickedAt),
+                userAgent: params.userAgent ?? '',
+                referrer: params.referrer ?? '',
+                ipHash: params.ipHash,
+              },
+            }),
+          'postgres',
+          'analytics_fallback_write',
+          FALLBACK_WRITE_TIMEOUT_MS,
+        );
         this.logger.log(
           `[Analytics] Durable fallback saved click event: eventId=${eventId}`,
         );
-      } catch (dbErr) {
-        const dbMessage =
-          dbErr instanceof Error ? dbErr.message : String(dbErr);
+      } catch (error) {
+        if (error instanceof DependencyTimeoutError) {
+          this.appLogger?.logDependencyTimeout({
+            dependency: error.dependency,
+            operation: error.operation,
+            timeout_ms: error.timeoutMs,
+            request_id: params.requestId,
+          });
+        }
         this.logger.error(
-          `[Analytics] Durable fallback database write failed: ${dbMessage}`,
+          '[Analytics] Durable fallback database write failed; details withheld.',
         );
       }
     }

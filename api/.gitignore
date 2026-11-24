@@ -1,1 +1,14 @@
+# Environment-specific files and local credentials. Keep the safe template tracked.
 .env
+.env.*
+!.env.example
+!**/.env.example
+
+# Private key and local credential material must never enter Git history.
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+.secrets/
