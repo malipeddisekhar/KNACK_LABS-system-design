@@ -1,0 +1,12 @@
+{
+  "summary": "Completed Module 08 BREAK in progress/decomposition/module-08/break-diagnosis.md. Diagnosed the silent integration defect where providers see empty dashboards: the Booking Service writes status 'confirmed' while the Dashboard Service queries for status 'active'. Traced the database query returning zero rows with HTTP 200, exposed the semantic drift across independent specifications, and mapped the customer and operational blast radius.",
+  "evidence": [
+    "Traced Booking Service output inserting 'confirmed' vs Dashboard repository filtering for 'active'.",
+    "Analyzed the silent failure mode: HTTP 200 OK with empty array, zero Sentry exceptions, but complete user failure.",
+    "Formulated the architectural lesson: individual correctness does not guarantee system correctness.",
+    "Identified the root cause as the lack of a centralized, compiled BookingStatus lifecycle enum."
+  ],
+  "artifacts": [
+    "progress/decomposition/module-08/break-diagnosis.md"
+  ]
+}

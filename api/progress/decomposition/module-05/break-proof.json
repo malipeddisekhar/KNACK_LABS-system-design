@@ -1,0 +1,12 @@
+{
+  "summary": "Completed Module 05 BREAK diagnosis in progress/decomposition/module-05/break-diagnosis.md. Analyzed the 4 failure modes of the 'Technically Correct Disaster' (unauthenticated access, rate limiting absence, stack trace leakage on 500 errors, and missing audit logging). Delineated ticket-specific boundaries from project-wide cross-cutting standards, and established the 'Silence is not a reference' architectural rule.",
+  "evidence": [
+    "Analyzed the root cause of each failure mode: omissions in specification, not AI execution failures.",
+    "Differentiated ticket concerns (endpoint security posture, domain audit logging) from cross-cutting architectural standards (global exception filters, rate limiting infrastructure).",
+    "Evaluated the scope impact of each remediation to ensure tickets remain focused.",
+    "Formulated the Cross-Cutting Standards Compliance template for prescriptive tickets."
+  ],
+  "artifacts": [
+    "progress/decomposition/module-05/break-diagnosis.md"
+  ]
+}

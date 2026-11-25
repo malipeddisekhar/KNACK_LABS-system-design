@@ -1,0 +1,11 @@
+{
+  "summary": "Completed Module 05 CONTEXT micro-exercise: deconstructed the vague booking ticket (Version A) by cataloging 12 essential specification questions across transport, payload schema, domain concurrency, response contracts, and anti-scope that an engineer or AI agent must know before writing usable code.",
+  "evidence": [
+    "Identified 12 concrete specification gaps in Version A covering URL routing, exact field names and types, validation error formats, 409 conflict handling, 201 response schemas, and anti-scoped side effects.",
+    "Contrasted Version A (ambiguity, round-trip delays, hallucinated implementations) with Version B (executable recipe with interface contracts and acceptance criteria).",
+    "Saved complete analysis to progress/decomposition/module-05/context-notes.md."
+  ],
+  "artifacts": [
+    "progress/decomposition/module-05/context-notes.md"
+  ]
+}

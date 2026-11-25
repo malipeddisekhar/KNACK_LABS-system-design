@@ -1,0 +1,13 @@
+{
+  "summary": "Completed Module 07 BREAK in progress/decomposition/module-07/break-diagnosis.md. Diagnosed the second requirement shock (Meridian IT director requiring 3-role RBAC: Manager, Employee, Department Head), escalated User Data Model and Auth/JWT from MINOR to MAJOR, cut all remaining SHOULD SHIP items (email notifications, provider calendar view, self-serve department admin UI), revised the PM impact statement, and formulated the Typed Role Bridge architecture preserving the 6-day investor demo milestone.",
+  "evidence": [
+    "Identified new artifacts affected: NestJS RolesGuard, department query filters, and 3-tier corporate seed personas.",
+    "Escalated User Model and Booking Model from MINOR to MAJOR (CompanyRole enum + department string).",
+    "Cut Provider Attendee Email (CUT-05), Calendar View (CUT-06), and Dynamic Admin UI (CUT-07) to absorb 14h of RBAC work.",
+    "Revised PM communication setting explicit boundary between static demo role-scoping (supported in 6 days) vs dynamic self-serve admin console (unsupported in 6 days).",
+    "Justified why pure boolean Option B collapsed and why full relational Option A is lethal, landing on the pragmatic Typed Role Bridge."
+  ],
+  "artifacts": [
+    "progress/decomposition/module-07/break-diagnosis.md"
+  ]
+}
